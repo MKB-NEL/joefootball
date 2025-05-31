@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Official website of Joe Football, your ultimate football team.">
+    <title>Joe Football - Official Website</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Roboto', Arial, sans-serif;
+        }
+        body {
+            background-color: #ffffff;
+            color: #003087;
+        }
+        header {
+            background-color: #0055b3;
+            color: #ffffff;
+            text-align: center;
+            padding: 2rem;
+            border-bottom: 4px solid #ffffff;
+            transition: background-color 0.3s ease;
+        }
+        header h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        .social-buttons {
+            margin-top: 1rem;
+        }
+        .social-buttons a {
+            display: inline-block;
+            background-color: #003087;
+            color: #ffffff;
+            padding: 0.5rem 1.5rem;
+            text-decoration: none;
+            margin: 0 0.5rem;
+            font-weight: 700;
+            border: 2px solid #ffffff;
+            border-radius: 0;
+            transition: all 0.3s ease;
+        }
+        .social-buttons a:hover {
+            background-color: #ffffff;
+            color: #0055b3;
+            transform: translateY(-2px);
+        }
+        nav {
+            background-color: #003087;
+            padding: 1rem;
+            border-bottom: 2px solid #ffffff;
+        }
+        nav ul {
+            list-style: none;
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+        }
+        nav a {
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 1.2rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            transition: color 0.3s ease;
+        }
+        nav a:hover {
+            color: #ffffff;
+            background-color: #0055b3;
+            padding: 0.5rem;
+        }
+        section {
+            padding: 2rem;
+            margin: 1rem auto;
+            max-width: 1200px;
+            background: #f5f5f5;
+            border: 2px solid #003087;
+            border-radius: 0;
+            transition: transform 0.3s ease;
+        }
+        section:hover {
+            transform: translateY(-5px);
+        }
+        h2 {
+            color: #0055b3;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+        }
+        .next-match {
+            background-color: #0055b3;
+            padding: 1rem;
+            text-align: center;
+            color: #ffffff;
+            border: 2px solid #ffffff;
+            border-radius: 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+        th, td {
+            border: 1px solid #003087;
+            padding: 0.75rem;
+            text-align: left;
+            color: #003087;
+        }
+        th {
+            background-color: #0055b3;
+            color: #ffffff;
+        }
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+        }
+        .player {
+            text-align: center;
+        }
+        .player img {
+            width: 150px;
+            height: 150px;
+            object-fit: cover;
+            border: 2px solid #003087;
+            border-radius: 0;
+            transition: transform 0.3s ease;
+        }
+        .player img:hover {
+            transform: scale(1.05);
+        }
+        .news-item {
+            margin-bottom: 1rem;
+            padding: 1rem;
+            border-bottom: 1px solid #003087;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            max-width: 500px;
+        }
+        input, textarea {
+            padding: 0.75rem;
+            border: 1px solid #003087;
+            background: #ffffff;
+            color: #003087;
+            border-radius: 0;
+            transition: border-color 0.3s ease;
+        }
+        input:focus, textarea:focus {
+            border-color: #0055b3;
+            outline: none;
+        }
+        button {
+            background-color: #0055b3;
+            color: #ffffff;
+            padding: 0.75rem;
+            border: 2px solid #ffffff;
+            border-radius: 0;
+            cursor: pointer;
+            font-weight: 700;
+            transition: all 0.3s ease;
+        }
+        button:hover {
+            background-color: #ffffff;
+            color: #0055b3;
+            transform: translateY(-2px);
+        }
+        footer {
+            text-align: center;
+            padding: 1rem;
+            background-color: #003087;
+            color: #ffffff;
+            border-top: 2px solid #ffffff;
+        }
+        @media (max-width: 600px) {
+            nav ul {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            header h1 {
+                font-size: 2.5rem;
+            }
+            .team-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>JOE FOOTBALL</h1>
+        <div class="social-buttons">
+            <a id="instagram-link" href="#" target="_blank">Instagram</a>
+            <a id="youtube-link" href="#" target="_blank">YouTube</a>
+        </div>
+    </header>
+    <nav>
+        <ul>
+            <li><a href="#home">Home</a></li>
+            <li><a href="#schedule">Schedule</a></li>
+            <li><a href="#team">Team</a></li>
+            <li><a href="#news">News</a></li>
+            <li><a href="#contact">Contact</a></li>
+        </ul>
+    </nav>
+    <section id="home">
+        <h2>Home</h2>
+        <div class="next-match" id="next-match">
+            <h3>Next Match</h3>
+            <p>Loading...</p>
+        </div>
+        <p>Welcome to Joe Football, where the pitch comes alive! Check our schedule, meet the team, and join the ultimate fan experience.</p>
+    </section>
+    <section id="schedule">
+        <h2>Schedule</h2>
+        <table id="schedule-table">
+            <tr>
+                <th>Date</th>
+                <th>Opponent</th>
+                <th>Time</th>
+                <th>Location</th>
+            </tr>
+        </table>
+    </section>
+    <section id="team">
+        <h2>Team</h2>
+        <div class="team-grid" id="team-grid"></div>
+    </section>
+    <section id="news">
+        <h2>News</h2>
+        <div id="news-list"></div>
+    </section>
+    <section id="contact">
+        <h2>Contact Us</h2>
+        <form id="contact-form">
+            <input type="text" placeholder="Name" required>
+            <input type="email" placeholder="Email" required>
+            <textarea placeholder="Your Message" rows="5" required></textarea>
+            <button type="submit">Send</button>
+        </form>
+        <p>Follow us on X: <a href="https://x.com" target="_blank">@JoeFootball</a></p>
+    </section>
+    <footer>
+        <p>© 2025 Joe Football. All rights reserved.</p>
+    </footer>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
+        import { getFirestore, collection, doc, getDoc, getDocs, orderBy, query, limit } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBBSNRSIEooqL1FZe-MQTzx2AntRvfJ85o",
+            authDomain: "joefootball-15e7a.firebaseapp.com",
+            projectId: "joefootball-15e7a",
+            storageBucket: "joefootball-15e7a.firebasestorage.app",
+            messagingSenderId: "976347287101",
+            appId: "1:976347287101:web:b13786927105f963986454",
+            measurementId: "G-9ZD2Y7CK35"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Load social media links
+        const socialDoc = await getDoc(doc(db, 'socialLinks', 'links'));
+        if (socialDoc.exists()) {
+            const data = socialDoc.data();
+            document.getElementById('instagram-link').href = data.instagram || '#';
+            document.getElementById('youtube-link').href = data.youtube || '#';
+        }
+
+        // Load next match
+        const scheduleQuery = query(collection(db, 'schedule'), orderBy('date', 'asc'), limit(1));
+        const scheduleSnapshot = await getDocs(scheduleQuery);
+        const match = scheduleSnapshot.docs[0]?.data();
+        if (match) {
+            const date = new Date(match.date.seconds * 1000).toLocaleDateString();
+            document.getElementById('next-match').innerHTML = `
+                <h3>Next Match</h3>
+                <p>Joe Football vs. ${match.opponent}</p>
+                <p>${date}, ${match.time}, ${match.location}</p>
+            `;
+        }
+
+        // Load schedule
+        const allSchedules = await getDocs(query(collection(db, 'schedule'), orderBy('date', 'asc')));
+        const table = document.getElementById('schedule-table');
+        allSchedules.forEach(doc => {
+            const match = doc.data();
+            const date = new Date(match.date.seconds * 1000).toLocaleDateString();
+            table.innerHTML += `<tr><td>${date}</td><td>${match.opponent}</td><td>${match.time}</td><td>${match.location}</td></tr>`;
+        });
+
+        // Load team
+        const teamSnapshot = await getDocs(collection(db, 'team'));
+        const grid = document.getElementById('team-grid');
+        teamSnapshot.forEach(doc => {
+            const player = doc.data();
+            grid.innerHTML += `
+                <div class="player">
+                    <img src="${player.image}" alt="${player.name}">
+                    <p>${player.name}, ${player.position}</p>
+                </div>`;
+        });
+
+        // Load news
+        const newsSnapshot = await getDocs(query(collection(db, 'news'), orderBy('date', 'desc')));
+        const list = document.getElementById('news-list');
+        newsSnapshot.forEach(doc => {
+            const news = doc.data();
+            const date = new Date(news.date.seconds * 1000).toLocaleDateString();
+            list.innerHTML += `
+                <div class="news-item">
+                    <h3>${news.title}</h3>
+                    <p>${date}: ${news.content}</p>
+                </div>`;
+        });
+
+        // Contact form (demo)
+        document.getElementById('contact-form').addEventListener('submit', e => {
+            e.preventDefault();
+            alert('Thank you for your message! We’ll get back to you soon.');
+            e.target.reset();
+        });
+    </script>
+</body>
+</html>
