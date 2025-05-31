@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Official website of Joe Football, your ultimate football team.">
-    <title>Joe Football - Official Website</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <meta name="description" content="Official website of Joe Football, your premier football team.">
+    <title>Joe Football - Home</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <style>
         * {
             margin: 0;
@@ -18,42 +19,44 @@
             color: #003087;
         }
         header {
-            background-color: #0055b3;
+            background: linear-gradient(180deg, #0055b3, #003087);
             color: #ffffff;
             text-align: center;
-            padding: 2rem;
-            border-bottom: 4px solid #ffffff;
-            transition: background-color 0.3s ease;
+            padding: 3rem 1rem;
+            border-bottom: 3px solid #ffffff;
         }
         header h1 {
-            font-size: 3.5rem;
-            font-weight: 700;
+            font-size: 4rem;
+            font-weight: 900;
             text-transform: uppercase;
-            letter-spacing: 2px;
+            letter-spacing: 3px;
         }
         .social-buttons {
-            margin-top: 1rem;
+            margin-top: 1.5rem;
         }
         .social-buttons a {
             display: inline-block;
-            background-color: #003087;
+            background-color: transparent;
             color: #ffffff;
             padding: 0.5rem 1.5rem;
             text-decoration: none;
-            margin: 0 0.5rem;
-            font-weight: 700;
+            font-size: 1.2rem;
             border: 2px solid #ffffff;
             border-radius: 0;
+            margin: 0 0.5rem;
             transition: all 0.3s ease;
         }
         .social-buttons a:hover {
             background-color: #ffffff;
             color: #0055b3;
-            transform: translateY(-2px);
+            transform: translateY(-3px);
         }
         nav {
             background-color: #003087;
             padding: 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
             border-bottom: 2px solid #ffffff;
         }
         nav ul {
@@ -65,21 +68,20 @@
         nav a {
             color: #ffffff;
             text-decoration: none;
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             font-weight: 700;
             text-transform: uppercase;
-            transition: color 0.3s ease;
+            padding: 0.5rem 1rem;
+            transition: background-color 0.3s ease;
         }
         nav a:hover {
-            color: #ffffff;
             background-color: #0055b3;
-            padding: 0.5rem;
         }
         section {
             padding: 2rem;
-            margin: 1rem auto;
+            margin: 2rem auto;
             max-width: 1200px;
-            background: #f5f5f5;
+            background: #f8f9fa;
             border: 2px solid #003087;
             border-radius: 0;
             transition: transform 0.3s ease;
@@ -89,108 +91,110 @@
         }
         h2 {
             color: #0055b3;
-            font-size: 2rem;
+            font-size: 2.5rem;
             font-weight: 700;
-            margin-bottom: 1rem;
+            margin-bottom: 1.5rem;
             text-transform: uppercase;
         }
-        .next-match {
-            background-color: #0055b3;
-            padding: 1rem;
-            text-align: center;
+        .slider {
+            position: relative;
+            width: 100%;
+            height: 400px;
+            overflow: hidden;
+        }
+        .slide {
+            display: none;
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+        .slide.active {
+            display: block;
+        }
+        .slide img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: brightness(70%);
+        }
+        .slide-description {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.7);
             color: #ffffff;
+            padding: 1rem 2rem;
+            font-size: 1.2rem;
+            font-weight: 700;
+            text-align: center;
             border: 2px solid #ffffff;
             border-radius: 0;
         }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 1rem 0;
+        .slider-nav {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
         }
-        th, td {
-            border: 1px solid #003087;
-            padding: 0.75rem;
-            text-align: left;
-            color: #003087;
-        }
-        th {
-            background-color: #0055b3;
-            color: #ffffff;
-        }
-        .team-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1.5rem;
-        }
-        .player {
-            text-align: center;
-        }
-        .player img {
-            width: 150px;
-            height: 150px;
-            object-fit: cover;
+        .slider-nav button {
+            background-color: #ffffff;
             border: 2px solid #003087;
             border-radius: 0;
-            transition: transform 0.3s ease;
-        }
-        .player img:hover {
-            transform: scale(1.05);
-        }
-        .news-item {
-            margin-bottom: 1rem;
-            padding: 1rem;
-            border-bottom: 1px solid #003087;
-        }
-        form {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-            max-width: 500px;
-        }
-        input, textarea {
-            padding: 0.75rem;
-            border: 1px solid #003087;
-            background: #ffffff;
-            color: #003087;
-            border-radius: 0;
-            transition: border-color 0.3s ease;
-        }
-        input:focus, textarea:focus {
-            border-color: #0055b3;
-            outline: none;
-        }
-        button {
-            background-color: #0055b3;
-            color: #ffffff;
-            padding: 0.75rem;
-            border: 2px solid #ffffff;
-            border-radius: 0;
+            width: 12px;
+            height: 12px;
             cursor: pointer;
-            font-weight: 700;
-            transition: all 0.3s ease;
+            transition: background-color 0.3s ease;
         }
-        button:hover {
-            background-color: #ffffff;
-            color: #0055b3;
-            transform: translateY(-2px);
+        .slider-nav button.active {
+            background-color: #0055b3;
+        }
+        .slider-nav button:hover {
+            background-color: #0055b3;
+        }
+        .slider-controls {
+            position: absolute;
+            top: 50%;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            transform: translateY(-50%);
+        }
+        .slider-controls button {
+            background: rgba(0, 0, 0, 0.5);
+            color: #ffffff;
+            border: none;
+            padding: 1rem;
+            cursor: pointer;
+            font-size: 1.5rem;
+            transition: background 0.3s ease;
+        }
+        .slider-controls button:hover {
+            background: #0055b3;
         }
         footer {
             text-align: center;
-            padding: 1rem;
+            padding: 1.5rem;
             background-color: #003087;
             color: #ffffff;
             border-top: 2px solid #ffffff;
         }
         @media (max-width: 600px) {
+            header h1 {
+                font-size: 2.5rem;
+            }
             nav ul {
                 flex-direction: column;
                 gap: 1rem;
             }
-            header h1 {
-                font-size: 2.5rem;
+            .slider {
+                height: 300px;
             }
-            .team-grid {
-                grid-template-columns: 1fr;
+            .slide-description {
+                font-size: 1rem;
+                padding: 0.5rem 1rem;
             }
         }
     </style>
@@ -199,62 +203,36 @@
     <header>
         <h1>JOE FOOTBALL</h1>
         <div class="social-buttons">
-            <a id="instagram-link" href="#" target="_blank">Instagram</a>
-            <a id="youtube-link" href="#" target="_blank">YouTube</a>
+            <a id="instagram-link" href="#" target="_blank"><i class="fab fa-instagram"></i> Instagram</a>
+            <a id="youtube-link" href="#" target="_blank"><i class="fab fa-youtube"></i> YouTube</a>
         </div>
     </header>
     <nav>
         <ul>
-            <li><a href="#home">Home</a></li>
-            <li><a href="#schedule">Schedule</a></li>
-            <li><a href="#team">Team</a></li>
-            <li><a href="#news">News</a></li>
-            <li><a href="#contact">Contact</a></li>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="schedule.html">Schedule</a></li>
+            <li><a href="team.html">Team</a></li>
+            <li><a href="news.html">News</a></li>
+            <li><a href="contact.html">Contact</a></li>
         </ul>
     </nav>
     <section id="home">
-        <h2>Home</h2>
-        <div class="next-match" id="next-match">
-            <h3>Next Match</h3>
-            <p>Loading...</p>
+        <div class="slider" id="slider">
+            <!-- Slides loaded dynamically -->
         </div>
-        <p>Welcome to Joe Football, where the pitch comes alive! Check our schedule, meet the team, and join the ultimate fan experience.</p>
-    </section>
-    <section id="schedule">
-        <h2>Schedule</h2>
-        <table id="schedule-table">
-            <tr>
-                <th>Date</th>
-                <th>Opponent</th>
-                <th>Time</th>
-                <th>Location</th>
-            </tr>
-        </table>
-    </section>
-    <section id="team">
-        <h2>Team</h2>
-        <div class="team-grid" id="team-grid"></div>
-    </section>
-    <section id="news">
-        <h2>News</h2>
-        <div id="news-list"></div>
-    </section>
-    <section id="contact">
-        <h2>Contact Us</h2>
-        <form id="contact-form">
-            <input type="text" placeholder="Name" required>
-            <input type="email" placeholder="Email" required>
-            <textarea placeholder="Your Message" rows="5" required></textarea>
-            <button type="submit">Send</button>
-        </form>
-        <p>Follow us on X: <a href="https://x.com" target="_blank">@JoeFootball</a></p>
+        <div class="slider-controls">
+            <button id="prev-slide"><i class="fas fa-chevron-left"></i></button>
+            <button id="next-slide"><i class="fas fa-chevron-right"></i></button>
+        </div>
+        <div class="slider-nav" id="slider-nav"></div>
+        <p>Welcome to Joe Football, where the pitch ignites! Explore our schedule, meet our players, and join the fanbase.</p>
     </section>
     <footer>
         <p>© 2025 Joe Football. All rights reserved.</p>
     </footer>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
-        import { getFirestore, collection, doc, getDoc, getDocs, orderBy, query, limit } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-firestore.js";
+        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBBSNRSIEooqL1FZe-MQTzx2AntRvfJ85o",
@@ -270,66 +248,83 @@
         const db = getFirestore(app);
 
         // Load social media links
-        const socialDoc = await getDoc(doc(db, 'socialLinks', 'links'));
-        if (socialDoc.exists()) {
-            const data = socialDoc.data();
-            document.getElementById('instagram-link').href = data.instagram || '#';
-            document.getElementById('youtube-link').href = data.youtube || '#';
+        try {
+            const socialDoc = await getDoc(doc(db, 'socialLinks', 'links'));
+            if (socialDoc.exists()) {
+                const data = socialDoc.data();
+                document.getElementById('instagram-link').href = data.instagram || '#';
+                document.getElementById('youtube-link').href = data.youtube || '#';
+            }
+        } catch (error) {
+            console.error('Error loading social links:', error);
         }
 
-        // Load next match
-        const scheduleQuery = query(collection(db, 'schedule'), orderBy('date', 'asc'), limit(1));
-        const scheduleSnapshot = await getDocs(scheduleQuery);
-        const match = scheduleSnapshot.docs[0]?.data();
-        if (match) {
-            const date = new Date(match.date.seconds * 1000).toLocaleDateString();
-            document.getElementById('next-match').innerHTML = `
-                <h3>Next Match</h3>
-                <p>Joe Football vs. ${match.opponent}</p>
-                <p>${date}, ${match.time}, ${match.location}</p>
-            `;
+        // Slider functionality
+        let currentSlide = 0;
+        let slides = [];
+        const slider = document.getElementById('slider');
+        const sliderNav = document.getElementById('slider-nav');
+
+        async function loadSlides() {
+            try {
+                const slideSnapshot = await getDocs(collection(db, 'slider'));
+                slides = slideSnapshot.docs.map(doc => doc.data());
+                renderSlides();
+                startAutoSlide();
+            } catch (error) {
+                console.error('Error loading slides:', error);
+            }
         }
 
-        // Load schedule
-        const allSchedules = await getDocs(query(collection(db, 'schedule'), orderBy('date', 'asc')));
-        const table = document.getElementById('schedule-table');
-        allSchedules.forEach(doc => {
-            const match = doc.data();
-            const date = new Date(match.date.seconds * 1000).toLocaleDateString();
-            table.innerHTML += `<tr><td>${date}</td><td>${match.opponent}</td><td>${match.time}</td><td>${match.location}</td></tr>`;
+        function renderSlides() {
+            slider.innerHTML = '';
+            sliderNav.innerHTML = '';
+            slides.forEach((slide, index) => {
+                const slideDiv = document.createElement('div');
+                slideDiv.className = `slide ${index === currentSlide ? 'active' : ''}`;
+                slideDiv.innerHTML = `
+                    <img src="${slide.image}" alt="${slide.description}">
+                    <div class="slide-description">${slide.description}</div>
+                `;
+                slider.appendChild(slideDiv);
+
+                const navButton = document.createElement('button');
+                navButton.className = index === currentSlide ? 'active' : '';
+                navButton.addEventListener('click', () => {
+                    currentSlide = index;
+                    updateSlides();
+                });
+                sliderNav.appendChild(navButton);
+            });
+        }
+
+        function updateSlides() {
+            document.querySelectorAll('.slide').forEach((slide, index) => {
+                slide.className = `slide ${index === currentSlide ? 'active' : ''}`;
+            });
+            document.querySelectorAll('.slider-nav button').forEach((button, index) => {
+                button.className = index === currentSlide ? 'active' : '';
+            });
+        }
+
+        function startAutoSlide() {
+            setInterval(() => {
+                currentSlide = (currentSlide + 1) % slides.length;
+                updateSlides();
+            }, 10000);
+        }
+
+        document.getElementById('prev-slide').addEventListener('click', () => {
+            currentSlide = (currentSlide - 1 + slides.length) % slides.length;
+            updateSlides();
         });
 
-        // Load team
-        const teamSnapshot = await getDocs(collection(db, 'team'));
-        const grid = document.getElementById('team-grid');
-        teamSnapshot.forEach(doc => {
-            const player = doc.data();
-            grid.innerHTML += `
-                <div class="player">
-                    <img src="${player.image}" alt="${player.name}">
-                    <p>${player.name}, ${player.position}</p>
-                </div>`;
+        document.getElementById('next-slide').addEventListener('click', () => {
+            currentSlide = (currentSlide + 1) % slides.length;
+            updateSlides();
         });
 
-        // Load news
-        const newsSnapshot = await getDocs(query(collection(db, 'news'), orderBy('date', 'desc')));
-        const list = document.getElementById('news-list');
-        newsSnapshot.forEach(doc => {
-            const news = doc.data();
-            const date = new Date(news.date.seconds * 1000).toLocaleDateString();
-            list.innerHTML += `
-                <div class="news-item">
-                    <h3>${news.title}</h3>
-                    <p>${date}: ${news.content}</p>
-                </div>`;
-        });
-
-        // Contact form (demo)
-        document.getElementById('contact-form').addEventListener('submit', e => {
-            e.preventDefault();
-            alert('Thank you for your message! We’ll get back to you soon.');
-            e.target.reset();
-        });
+        loadSlides();
     </script>
 </body>
 </html>
