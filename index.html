@@ -850,7 +850,7 @@
             <div class="row">
                 <div class="col-lg-4 mb-4">
                     <div class="footer-logo">JOE FOOTBALL</div>
-                    <p>Designed by M.K.Bertrand, Creator of btem@fficial | 2025</p>
+                    <p>Passion, Pride, Performance - The Joe Football Way</p>
                     <div class="footer-social mt-3">
                         <a id="footer-instagram" href="#" target="_blank"><i class="fab fa-instagram"></i></a>
                         <a id="footer-youtube" href="#" target="_blank"><i class="fab fa-youtube"></i></a>
@@ -1024,6 +1024,10 @@
                 const gallerySnapshot = await getDocs(galleryQuery);
                 const galleryContainer = document.getElementById('gallery-container');
                 galleryContainer.innerHTML = '';
+                if (gallerySnapshot.empty) {
+                    galleryContainer.innerHTML = '<p class="text-center">No images available.</p>';
+                    return;
+                }
                 gallerySnapshot.forEach(doc => {
                     const item = doc.data();
                     const slide = document.createElement('div');
@@ -1044,6 +1048,7 @@
                 gallerySwiper.update();
             } catch (e) {
                 console.error('Error loading gallery: ', e);
+                document.getElementById('gallery-container').innerHTML = '<p class="text-center">Failed to load gallery images.</p>';
             }
         }
 
@@ -1054,6 +1059,10 @@
                 const newsSnapshot = await getDocs(newsQuery);
                 const newsContainer = document.getElementById('news-container');
                 newsContainer.innerHTML = '';
+                if (newsSnapshot.empty) {
+                    newsContainer.innerHTML = '<p class="text-center">No news available.</p>';
+                    return;
+                }
                 newsSnapshot.forEach(doc => {
                     const news = doc.data();
                     const date = news.timestamp.toDate().toLocaleString();
@@ -1081,6 +1090,7 @@
                 });
             } catch (e) {
                 console.error('Error loading news: ', e);
+                document.getElementById('news-container').innerHTML = '<p class="text-center">Failed to load news.</p>';
             }
         }
 
@@ -1090,6 +1100,10 @@
                 const teamSnapshot = await getDocs(query(collection(db, 'players'), orderBy('name')));
                 const teamGrid = document.getElementById('team-grid');
                 teamGrid.innerHTML = '';
+                if (teamSnapshot.empty) {
+                    teamGrid.innerHTML = '<p class="text-center">No players available.</p>';
+                    return;
+                }
                 teamSnapshot.forEach(doc => {
                     const player = doc.data();
                     teamGrid.innerHTML += `
@@ -1105,9 +1119,9 @@
                         </div>
                     `;
                 });
-                document.getElementById('player-count').textContent = teamSnapshot.size;
             } catch (e) {
                 console.error('Error loading team: ', e);
+                document.getElementById('team-grid').innerHTML = '<p class="text-center">Failed to load team.</p>';
             }
         }
 
@@ -1117,6 +1131,10 @@
                 const testimonialSnapshot = await getDocs(query(collection(db, 'testimonials'), orderBy('timestamp', 'desc')));
                 const testimonyContainer = document.getElementById('testimony-container');
                 testimonyContainer.innerHTML = '';
+                if (testimonialSnapshot.empty) {
+                    testimonyContainer.innerHTML = '<p class="text-center">No testimonials available.</p>';
+                    return;
+                }
                 testimonialSnapshot.forEach(doc => {
                     const testimony = doc.data();
                     const date = testimony.timestamp.toDate().toLocaleString();
@@ -1134,6 +1152,7 @@
                 testimonialSwiper.update();
             } catch (e) {
                 console.error('Error loading testimonials: ', e);
+                document.getElementById('testimony-container').innerHTML = '<p class="text-center">Failed to load testimonials.</p>';
             }
         }
 
@@ -1180,43 +1199,55 @@
             }
         }
 
-        // Load counting stats
-        async function loadCountingStats() {
+        // Load stats
+        async function loadStats() {
             try {
-                const matchSnapshot = await getDocs(collection(db, 'schedule'));
-                const trophySnapshot = await getDocs(collection(db, 'trophies'));
-                document.getElementById('match-count').textContent = matchSnapshot.size;
-                document.getElementById('trophy-count').textContent = trophySnapshot.size;
+                const statsDoc = await getDoc(doc(db, 'settings', 'stats'));
+                if (statsDoc.exists()) {
+                    const data = statsDoc.data();
+                    document.getElementById('match-count').textContent = data.matches || 0;
+                    document.getElementById('player-count').textContent = data.players || 0;
+                    document.getElementById('trophy-count').textContent = data.trophies || 0;
+                }
             } catch (e) {
-                console.error('Error loading counting stats: ', e);
+                console.error('Error loading stats: ', e);
+                document.getElementById('match-count').textContent = 0;
+                document.getElementById('player-count').textContent = 0;
+                document.getElementById('trophy-count').textContent = 0;
             }
         }
 
         // Initialize
         async function init() {
-            await loadSocialLinks();
-            await loadCoach();
-            await loadGallery();
-            await loadNews();
-            await loadTeam();
-            await loadTestimonials();
-            await loadFooter();
-            await loadCountingStats();
-            const animateElements = document.querySelectorAll('.animate');
-            const observer = new IntersectionObserver(entries => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        entry.target.style.opacity = 1;
-                        entry.target.style.transform = 'translateY(0)';
-                    }
+            try {
+                await Promise.all([
+                    loadSocialLinks(),
+                    loadCoach(),
+                    loadGallery(),
+                    loadNews(),
+                    loadTeam(),
+                    loadTestimonials(),
+                    loadFooter(),
+                    loadStats()
+                ]);
+                const animateElements = document.querySelectorAll('.animate');
+                const observer = new IntersectionObserver(entries => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            entry.target.style.opacity = 1;
+                            entry.target.style.transform = 'translateY(0)';
+                        }
+                    });
+                }, { threshold: 0.1 });
+                animateElements.forEach(element => {
+                    element.style.opacity = 0;
+                    element.style.transform = 'translateY(20px)';
+                    element.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+                    observer.observe(element);
                 });
-            }, { threshold: 0.1 });
-            animateElements.forEach(element => {
-                element.style.opacity = 0;
-                element.style.transform = 'translateY(20px)';
-                element.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-                observer.observe(element);
-            });
+            } catch (e) {
+                console.error('Initialization error: ', e);
+            }
         }
 
         document.addEventListener('DOMContentLoaded', init);
