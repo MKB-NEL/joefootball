@@ -800,17 +800,6 @@
                         <div class="mb-3">
                             <textarea class="form-control" id="testimony-text" placeholder="Share your experience with Joe Football Club" rows="4" required></textarea>
                         </div>
-                        <div class="mb-3">
-                            <label for="testimony-rating" class="form-label">Rating (1-5 stars)</label>
-                            <select class="form-control" id="testimony-rating" required>
-                                <option value="">Select rating</option>
-                                <option value="5">★★★★★</option>
-                                <option value="4">★★★★</option>
-                                <option value="3">★★★</option>
-                                <option value="2">★★</option>
-                                <option value="1">★</option>
-                            </select>
-                        </div>
                         <button type="submit" class="btn btn-primary">Submit Testimonial</button>
                     </form>
                 </div>
@@ -916,7 +905,7 @@
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, doc, setDoc, addDoc, getDoc, getDocs, query, orderBy, limit, Timestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, doc, setDoc, addDoc, getDoc, getDocs, query, orderBy, limit, Timestamp, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
         import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
         const firebaseConfig = {
@@ -932,7 +921,6 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const storage = getStorage(app);
-        const IMGBB_API_KEY = '5f06b308b918d5a7ef3c4f418da95032';
 
         // Initialize Swiper sliders
         const gallerySwiper = new Swiper('.gallery-slider', {
@@ -1128,7 +1116,8 @@
         // Load testimonials
         async function loadTestimonials() {
             try {
-                const testimonialSnapshot = await getDocs(query(collection(db, 'testimonials'), orderBy('timestamp', 'desc')));
+                const testimonialQuery = query(collection(db, 'testimonials'), where('rated', '==', true), orderBy('timestamp', 'desc'));
+                const testimonialSnapshot = await getDocs(testimonialQuery);
                 const testimonyContainer = document.getElementById('testimony-container');
                 testimonyContainer.innerHTML = '';
                 if (testimonialSnapshot.empty) {
@@ -1160,11 +1149,14 @@
         document.getElementById('testimony-form').addEventListener('submit', async e => {
             e.preventDefault();
             const text = document.getElementById('testimony-text').value;
-            const rating = parseInt(document.getElementById('testimony-rating').value);
             try {
-                await addDoc(collection(db, 'testimonials'), { text, rating, timestamp: Timestamp.now() });
-                alert('Testimonial submitted!');
-                loadTestimonials();
+                await addDoc(collection(db, 'testimonials'), { 
+                    text, 
+                    rating: null, 
+                    timestamp: Timestamp.now(), 
+                    rated: false 
+                });
+                alert('Testimonial submitted! Awaiting admin rating.');
                 e.target.reset();
             } catch (e) {
                 alert('Error: ' + e.message);
