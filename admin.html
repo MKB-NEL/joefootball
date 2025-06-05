@@ -10,7 +10,6 @@
     <style>
         body { font-family: 'Montserrat', sans-serif; }
         .spinner-border {
-            display: none;
             border: 2px solid currentColor;
             border-top-color: transparent;
             border-radius: 50%;
@@ -22,282 +21,666 @@
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
+        .toast {
+            position: fixed;
+            bottom: 1rem;
+            right: 1rem;
+            z-index: 1000;
+            transition: opacity 0.3s;
+        }
+        .skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: skeleton-loading 1.5s infinite;
+        }
+        @keyframes skeleton-loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal.show { display: flex; }
+        .sidebar {
+            transition: transform 0.3s ease-in-out;
+        }
+        .sidebar.hidden {
+            transform: translateX(-100%);
+        }
+        @media (min-width: 768px) {
+            .sidebar.hidden { transform: translateX(0); }
+        }
     </style>
 </head>
 <body class="bg-gray-100">
-    <div class="container mx-auto px-4 py-8">
-        <div class="flex justify-between items-center mb-8">
-            <h1 class="text-3xl font-bold text-blue-900">Admin Panel - Joe Football Club</h1>
-            <a href="index.html" class="text-blue-700 hover:text-blue-900 font-medium flex items-center">
-                Back to Site <i class="fas fa-arrow-right ml-2"></i>
-            </a>
-        </div>
-
-        <!-- News Form -->
-        <div class="bg-white p-6 rounded-lg shadow-md mb-8">
-            <h2 class="text-2xl font-bold mb-4 text-blue-900">Add News</h2>
-            <form id="news-form">
+    <!-- Login Section -->
+    <div id="login-section" class="flex items-center justify-center min-h-screen">
+        <div class="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
+            <h2 class="text-2xl font-bold mb-6 text-blue-900 text-center">Admin Login</h2>
+            <form id="login-form">
                 <div class="mb-4">
-                    <label class="block text-gray-700 mb-2">Title</label>
-                    <input type="text" id="news-title" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                    <label class="block text-gray-700 mb-2">Password</label>
+                    <input type="password" id="login-password" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
                 </div>
-                <div class="mb-4">
-                    <label class="block text-gray-700 mb-2">Category</label>
-                    <input type="text" id="news-category" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g., Match Report, Transfer">
-                </div>
-                <div class="mb-4">
-                    <label class="block text-gray-700 mb-2">Content</label>
-                    <textarea id="news-content" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" rows="5" required></textarea>
-                </div>
-                <div class="mb-4">
-                    <label class="block text-gray-700 mb-2">Image</label>
-                    <input type="file" id="news-image" accept="image/*" class="w-full">
-                </div>
-                <button type="submit" class="bg-blue-700 text-white px-6 py-2 rounded-md hover:bg-blue-800 flex items-center">
-                    Submit
-                    <span class="spinner-border ml-2"></span>
-                </button>
-            </form>
-        </div>
-
-        <!-- Player Form -->
-        <div class="bg-white p-6 rounded-lg shadow-md mb-8">
-            <h2 class="text-2xl font-bold mb-4 text-blue-900">Add Player</h2>
-            <form id="player-form">
-                <div class="mb-4">
-                    <label class="block text-gray-700 mb-2">Name</label>
-                    <input type="text" id="player-name" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                </div>
-                <div class="mb-4">
-                    <label class="block text-gray-700 mb-2">Number</label>
-                    <input type="number" id="player-number" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required min="1" max="99">
-                </div>
-                <div class="mb-4">
-                    <label class="block text-gray-700 mb-2">Position</label>
-                    <input type="text" id="player-position" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required placeholder="e.g., Goalkeeper, Midfielder">
-                </div>
-                <div class="mb-4">
-                    <label class="block text-gray-700 mb-2">Nationality</label>
-                    <input type="text" id="player-nationality" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                </div>
-                <div class="mb-4">
-                    <label class="block text-gray-700 mb-2">Role (Optional)</label>
-                    <input type="text" id="player-role" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g., Captain, Vice-Captain">
-                </div>
-                <div class="mb-4">
-                    <label class="block text-gray-700 mb-2">Image</label>
-                    <input type="file" id="player-image" accept="image/*" class="w-full">
-                </div>
-                <button type="submit" class="bg-blue-700 text-white px-6 py-2 rounded-md hover:bg-blue-800 flex items-center">
-                    Submit
-                    <span class="spinner-border ml-2"></span>
-                </button>
-            </form>
-        </div>
-
-        <!-- Gallery Form -->
-        <div class="bg-white p-6 rounded-lg shadow-md mb-8">
-            <h2 class="text-2xl font-bold mb-4 text-blue-900">Add Gallery Image</h2>
-            <form id="gallery-form">
-                <div class="mb-4">
-                    <label class="block text-gray-700 mb-2">Description</label>
-                    <input type="text" id="gallery-description" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                </div>
-                <div class="mb-4">
-                    <label class="block text-gray-700 mb-2">Image</label>
-                    <input type="file" id="gallery-image" accept="image/*" class="w-full" required>
-                </div>
-                <button type="submit" class="bg-blue-700 text-white px-6 py-2 rounded-md hover:bg-blue-800 flex items-center">
-                    Submit
-                    <span class="spinner-border ml-2"></span>
-                </button>
-            </form>
-        </div>
-
-        <!-- Coach Form -->
-        <div class="bg-white p-6 rounded-lg shadow-md mb-8">
-            <h2 class="text-2xl font-bold mb-4 text-blue-900">Update Coach</h2>
-            <form id="coach-form">
-                <div class="mb-4">
-                    <label class="block text-gray-700 mb-2">Name</label>
-                    <input type="text" id="coach-name" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                </div>
-                <div class="mb-4">
-                    <label class="block text-gray-700 mb-2">Speech</label>
-                    <textarea id="coach-speech" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" rows="4"></textarea>
-                </div>
-                <div class="mb-4">
-                    <label class="block text-gray-700 mb-2">Badges (comma-separated)</label>
-                    <input type="text" id="coach-badges" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g., Tactician, Leader">
-                </div>
-                <div class="mb-4">
-                    <label class="block text-gray-700 mb-2">Achievements</label>
-                    <input type="text" id="coach-achievements" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g., 5 League Titles">
-                </div>
-                <div class="mb-4">
-                    <label class="block text-gray-700 mb-2">Image</label>
-                    <input type="file" id="coach-image" accept="image/*" class="w-full">
-                </div>
-                <button type="submit" class="bg-blue-700 text-white px-6 py-2 rounded-md hover:bg-blue-800 flex items-center">
-                    Submit
-                    <span class="spinner-border ml-2"></span>
-                </button>
-            </form>
-        </div>
-
-        <!-- Next Match Form -->
-        <div class="bg-white p-6 rounded-lg shadow-md mb-8">
-            <h2 class="text-2xl font-bold mb-4 text-blue-900">Update Next Match</h2>
-            <form id="match-form">
-                <div class="mb-4">
-                    <label class="block text-gray-700 mb-2">Home Team</label>
-                    <input type="text" id="match-home-team" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                </div>
-                <div class="mb-4">
-                    <label class="block text-gray-700 mb-2">Away Team</label>
-                    <input type="text" id="match-away-team" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                </div>
-                <div class="mb-4">
-                    <label class="block text-gray-700 mb-2">Competition</label>
-                    <input type="text" id="match-competition" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                </div>
-                <div class="mb-4">
-                    <label class="block text-gray-700 mb-2">Date</label>
-                    <input type="text" id="match-date" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required placeholder="e.g., SAT, MAY 20">
-                </div>
-                <div class="mb-4">
-                    <label class="block text-gray-700 mb-2">Time</label>
-                    <input type="text" id="match-time" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required placeholder="e.g., 19:45">
-                </div>
-                <button type="submit" class="bg-blue-700 text-white px-6 py-2 rounded-md hover:bg-blue-800 flex items-center">
-                    Submit
-                    <span class="spinner-border ml-2"></span>
-                </button>
-            </form>
-        </div>
-
-        <!-- Stats Form -->
-        <div class="bg-white p-6 rounded-lg shadow-md mb-8">
-            <h2 class="text-2xl font-bold mb-4 text-blue-900">Update Stats</h2>
-            <form id="stats-form">
-                <div class="mb-4">
-                    <label class="block text-gray-700 mb-2">Matches</label>
-                    <input type="number" id="stats-matches" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required min="0">
-                </div>
-                <div class="mb-4">
-                    <label class="block text-gray-700 mb-2">Wins</label>
-                    <input type="number" id="stats-wins" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required min="0">
-                </div>
-                <div class="mb-4">
-                    <label class="block text-gray-700 mb-2">Goals</label>
-                    <input type="number" id="stats-goals" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required min="0">
-                </div>
-                <div class="mb-4">
-                    <label class="block text-gray-700 mb-2">Points</label>
-                    <input type="number" id="stats-points" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required min="0">
-                </div>
-                <button type="submit" class="bg-blue-700 text-white px-6 py-2 rounded-md hover:bg-blue-800 flex items-center">
-                    Submit
-                    <span class="spinner-border ml-2"></span>
-                </button>
-            </form>
-        </div>
-
-        <!-- Sponsor Form -->
-        <div class="bg-white p-6 rounded-lg shadow-md mb-8">
-            <h2 class="text-2xl font-bold mb-4 text-blue-900">Add Sponsor</h2>
-            <form id="sponsor-form">
-                <div class="mb-4">
-                    <label class="block text-gray-700 mb-2">Name</label>
-                    <input type="text" id="sponsor-name" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                </div>
-                <div class="mb-4">
-                    <label class="block text-gray-700 mb-2">Image</label>
-                    <input type="file" id="sponsor-image" accept="image/*" class="w-full" required>
-                </div>
-                <button type="submit" class="bg-blue-700 text-white px-6 py-2 rounded-md hover:bg-blue-800 flex items-center">
-                    Submit
-                    <span class="spinner-border ml-2"></span>
-                </button>
-            </form>
-        </div>
-
-        <!-- Social Links Form -->
-        <div class="bg-white p-6 rounded-lg shadow-md mb-8">
-            <h2 class="text-2xl font-bold mb-4 text-blue-900">Update Social Links</h2>
-            <form id="social-form">
-                <div class="mb-4">
-                    <label class="block text-gray-700 mb-2">Facebook</label>
-                    <input type="url" id="social-facebook" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="https://facebook.com/...">
-                </div>
-                <div class="mb-4">
-                    <label class="block text-gray-700 mb-2">Twitter</label>
-                    <input type="url" id="social-twitter" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="https://twitter.com/...">
-                </div>
-                <div class="mb-4">
-                    <label class="block text-gray-700 mb-2">Instagram</label>
-                    <input type="url" id="social-instagram" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="https://instagram.com/...">
-                </div>
-                <div class="mb-4">
-                    <label class="block text-gray-700 mb-2">YouTube</label>
-                    <input type="url" id="social-youtube" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="https://youtube.com/...">
-                </div>
-                <div class="mb-4">
-                    <label class="block text-gray-700 mb-2">TikTok</label>
-                    <input type="url" id="social-tiktok" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="https://tiktok.com/...">
-                </div>
-                <button type="submit" class="bg-blue-700 text-white px-6 py-2 rounded-md hover:bg-blue-800 flex items-center">
-                    Submit
-                    <span class="spinner-border ml-2"></span>
-                </button>
-            </form>
-        </div>
-
-        <!-- Footer Form -->
-        <div class="bg-white p-6 rounded-lg shadow-md mb-8">
-            <h2 class="text-2xl font-bold mb-4 text-blue-900">Update Footer</h2>
-            <form id="footer-form">
-                <div class="mb-4">
-                    <label class="block text-gray-700 mb-2">Footer Text</label>
-                    <input type="text" id="footer-text" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required placeholder="e.g., © 2025 Joe Football Club">
-                </div>
-                <button type="submit" class="bg-blue-700 text-white px-6 py-2 rounded-md hover:bg-blue-800 flex items-center">
-                    Submit
-                    <span class="spinner-border ml-2"></span>
+                <button type="submit" class="w-full bg-blue-700 text-white px-6 py-2 rounded-md hover:bg-blue-800 flex items-center justify-center">
+                    Login
+                    <span class="spinner-border ml-2 hidden"></span>
                 </button>
             </form>
         </div>
     </div>
 
+    <!-- Admin Panel -->
+    <div id="admin-panel" class="hidden min-h-screen flex flex-col md:flex-row">
+        <!-- Sidebar -->
+        <div id="sidebar" class="w-full md:w-64 bg-blue-900 text-white fixed md:static h-full p-4 sidebar">
+            <div class="flex justify-between items-center mb-8">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center">
+                        <span class="text-blue-800 font-bold text-xl">JFC</span>
+                    </div>
+                    <span class="text-xl font-bold ml-2">Admin</span>
+                </div>
+                <button id="sidebar-toggle" class="md:hidden text-white focus:outline-none">
+                    <i class="fas fa-times text-2xl"></i>
+                </button>
+            </div>
+            <nav class="space-y-2">
+                <a href="#news" class="block py-2 px-4 hover:bg-blue-800 rounded">News</a>
+                <a href="#players" class="block py-2 px-4 hover:bg-blue-800 rounded">Players</a>
+                <a href="#gallery" class="block py-2 px-4 hover:bg-blue-800 rounded">Gallery</a>
+                <a href="#coach" class="block py-2 px-4 hover:bg-blue-800 rounded">Coach</a>
+                <a href="#next-match" class="block py-2 px-4 hover:bg-blue-800 rounded">Next Match</a>
+                <a href="#stats" class="block py-2 px-4 hover:bg-blue-800 rounded">Stats</a>
+                <a href="#sponsors" class="block py-2 px-4 px-6 hover:bg-blue-800 rounded"> Sponsors</a>
+                <a href="#social" class="block py-2 px-4 hover:bg-blue-800 rounded">Social Links</a>
+                <a href="#footer" class="block py-2 px-4 hover:bg-blue-800 rounded">Footer</a>
+                <a href="#testimonials" class="block py-2 px-4 hover:bg-blue-800 rounded">Testimonials</a>
+                <a href="#contact-submissions" class="block py-2 px-4 hover:bg-blue-800 rounded">Contact Submissions</a>
+                <button id="logout-button" class="w-full text-left py-2 px-4 hover:bg-blue-800 rounded mt-4">Logout</button>
+            </nav>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content flex-grow p-4 md:ml-64">
+            <div class="flex justify-between items-center justify-between mb-6">
+                <button id="sidebar-open" class="md:hidden bg-blue-700 text-white px-4 py-2 rounded-md">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+                <h1 class="text-2xl md:text-3xl font-bold text-blue-900">Admin Panel - Joe Football Club</h1>
+                <a href="index.html" class="text-blue-700 hover:text-blue-900 font-medium flex items-center">
+                    Back to Site <i class="fas fa-arrow-right ml-2"></i>
+                </a>
+            </div>
+
+            <!-- News Section -->
+            <div id="news" class="mb-12">
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h2 class="text-2xl font-bold mb-4 text-blue-900 flex justify-between items-center cursor-pointer" onclick="toggleSection('news-form')">
+                        Add News <i class="fas fa-chevron-down"></i>
+                    </h2>
+                    <form id="news-form" class="hidden space-y-4">
+                        <div>
+                            <label class="block text-gray-700 mb-2">Title</label>
+                            <input type="text" id="news-title" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 mb-2">Category</label>
+                            <input type="text" id="news-category" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g., Match Report, Transfer">
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 mb-2">Content</label>
+                            <textarea id="news-content" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" rows="5" required></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 mb-2">Image</label>
+                            <input type="file" id="news-image" accept="image/*" class="w-full">
+                            <img id="news-image-preview" class="mt-2 max-w-xs hidden" alt="Image Preview">
+                        </div>
+                        <button type="submit" class="bg-blue-700 text-white px-6 py-2 rounded-md hover:bg-blue-800 flex items-center">
+                            Submit
+                            <span class="spinner-border ml-2 hidden"></span>
+                        </button>
+                    </form>
+                    <h3 class="text-xl font-bold mt-8 mb-4 text-blue-900">Existing News</h3>
+                    <div id="news-table" class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead>
+                                <tr class="bg-blue-100">
+                                    <th class="p-2">Title</th>
+                                    <th class="p-2">Category</th>
+                                    <th class="p-2">Date</th>
+                                    <th class="p-2">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="news-table-body">
+                                <tr><td colspan="4" class="p-2 skeleton h-8"></td></tr>
+                                <tr><td colspan="4" class="p-2 skeleton h-8"></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Players Section -->
+            <div id="players" class="mb-12">
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h2 class="text-2xl font-bold mb-4 text-blue-900 flex justify-between items-center cursor-pointer" onclick="toggleSection('player-form')">
+                        Add Player
+                        <i class="fas fa-chevron-down"></i>
+                    </h2>
+                    <form id="player-form" class="hidden space-y-4">
+                        <div>
+                            <label class="block text-gray-700 mb-2">Name</label>
+                            <input type="text" id="player-name" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 mb-2">Number</label>
+                            <input type="number" id="player-number" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required min="1" max="99">
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 mb-2">Position</label>
+                            <input type="text" id="player-position" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 mb-2">Nationality</label>
+                            <input type="text" id="player-nationality" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 mb-2">Role (Optional)</label>
+                            <input type="text" id="player-role" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g., Captain">
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 mb-2">Image</label>
+                            <input type="file" id="player-image" accept="image/*" class="w-full">
+                            <img id="player-image-preview" class="mt-2 max-w-xs hidden" alt="Image Preview">
+                        </div>
+                        <button type="submit" class="bg-blue-700 text-white px-6 py-2 rounded-md hover:bg-blue-800 flex items-center">
+                            Submit
+                            <span class="spinner-border ml-2 hidden"></span>
+                        </button>
+                    </form>
+                    <h3 class="text-xl font-bold mt-8 mb-4 text-blue-900">Existing Players</h3>
+                    <div id="players-table" class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead>
+                                <tr class="bg-blue-100">
+                                    <th class="p-2">Name</th>
+                                    <th class="p-2">Number</th>
+                                    <th class="p-2">Position</th>
+                                    <th class="p-2">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="players-table-body">
+                                <tr><td colspan="4" class="p-2 skeleton h-8"></td></tr>
+                                <tr><td colspan="4" class="p-2 skeleton h-8"></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gallery Section -->
+            <div id="gallery" class="mb-12">
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h2 class="text-2xl font-bold mb-4 text-blue-900 flex justify-between items-center cursor-pointer" onclick="toggleSection('gallery-form')">
+                        Add Gallery Image <i class="fas fa-chevron-down"></i>
+                    </h2>
+                    <form id="gallery-form" class="hidden space-y-4">
+                        <div>
+                            <label class="block text-gray-700 mb-2">Description</label>
+                            <input type="text" id="gallery-description" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 mb-2">Image</label>
+                            <input type="file" id="gallery-image" accept="image/*" class="w-full" required>
+                            <img id="gallery-image-preview" class="mt-2 max-w-xs hidden" alt="Image Preview">
+                        </div>
+                        <button type="submit" class="bg-blue-700 text-white px-6 py-2 rounded-md hover:bg-blue-800 flex items-center">
+                            Submit
+                            <span class="spinner-border ml-2 hidden"></span>
+                        </button>
+                    </form>
+                    <h3 class="text-xl font-bold mt-8 mb-4 text-blue-900">Existing Gallery</h3>
+                    <div id="gallery-table" class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead>
+                                <tr class="bg-blue-100">
+                                    <th class="p-2">Description</th>
+                                    <th class="p-2">Image</th>
+                                    <th class="p-2">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="gallery-table-body">
+                                <tr><td colspan="3" class="p-2 skeleton h-8"></td></tr>
+                                <tr><td colspan="3" class="p-2 skeleton h-8"></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Coach Section -->
+            <div id="coach" class="mb-12">
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h2 class="text-2xl font-bold mb-4 text-blue-900 flex justify-between items-center cursor-pointer" onclick="toggleSection('coach-form')">
+                        Update Coach <i class="fas fa-chevron-down"></i>
+                    </h2>
+                    <form id="coach-form" class="hidden space-y-4">
+                        <div>
+                            <label class="block text-gray-700 mb-2">Name</label>
+                            <input type="text" id="coach-name" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 mb-2">Speech</label>
+                            <textarea id="coach-speech" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" rows="4"></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 mb-2">Badges (comma-separated)</label>
+                            <input type="text" id="coach-badges" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g., UEFA Pro, FA Level 5">
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 mb-2">Achievements</label>
+                            <input type="text" id="coach-achievements" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 mb-2">Image</label>
+                            <input type="file" id="coach-image" accept="image/*" class="w-full">
+                            <img id="coach-image-preview" class="mt-2 max-w-xs hidden" alt="Image Preview">
+                        </div>
+                        <button type="submit" class="bg-blue-700 text-white px-6 py-2 rounded-md hover:bg-blue-800 flex items-center">
+                            Submit
+                            <span class="spinner-border ml-2 hidden"></span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Next Match Section -->
+            <div id="next-match" class="mb-12">
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h2 class="text-2xl font-bold mb-4 text-blue-900 flex justify-between items-center cursor-pointer" onclick="toggleSection('match-form')">
+                        Update Next Match <i class="fas fa-chevron-down"></i>
+                    </h2>
+                    <form id="match-form" class="hidden space-y-4">
+                        <div>
+                            <label class="block text-gray-700 mb-2">Home Team</label>
+                            <input type="text" id="match-home-team" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 mb-2">Away Team</label>
+                            <input type="text" id="match-away-team" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 mb-2">Competition</label>
+                            <input type="text" id="match-competition" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 mb-2">Date (e.g., 2025-06-10)</label>
+                            <input type="text" id="match-date" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 mb-2">Time (e.g., 15:00)</label>
+                            <input type="text" id="match-time" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                        </div>
+                        <button type="submit" class="bg-blue-700 text-white px-6 py-2 rounded-md hover:bg-blue-800 flex items-center">
+                            Submit
+                            <span class="spinner-border ml-2 hidden"></span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Stats Section -->
+            <div id="stats" class="mb-12">
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h2 class="text-2xl font-bold mb-4 text-blue-900 flex justify-between items-center cursor-pointer" onclick="toggleSection('stats-form')">
+                        Update Stats <i class="fas fa-chevron-down"></i>
+                    </h2>
+                    <form id="stats-form" class="hidden space-y-4">
+                        <div>
+                            <label class="block text-gray-700 mb-2">Matches</label>
+                            <input type="number" id="stats-matches" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required min="0">
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 mb-2">Wins</label>
+                            <input type="number" id="stats-wins" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required min="0">
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 mb-2">Goals</label>
+                            <input type="number" id="stats-goals" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required min="0">
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 mb-2">Points</label>
+                            <input type="number" id="stats-points" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required min="0">
+                        </div>
+                        <button type="submit" class="bg-blue-700 text-white px-6 py-2 rounded-md hover:bg-blue-800 flex items-center">
+                            Submit
+                            <span class="spinner-border ml-2 hidden"></span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Sponsors Section -->
+            <div id="sponsors" class="mb-12">
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h2 class="text-2xl font-bold mb-4 text-blue-900 flex justify-between items-center cursor-pointer" onclick="toggleSection('sponsor-form')">
+                        Add Sponsor <i class="fas fa-chevron-down"></i>
+                    </h2>
+                    <form id="sponsor-form" class="hidden space-y-4">
+                        <div>
+                            <label class="block text-gray-700 mb-2">Name</label>
+                            <input type="text" id="sponsor-name" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 mb-2">Image</label>
+                            <input type="file" id="sponsor-image" accept="image/*" class="w-full" required>
+                            <img id="sponsor-image-preview" class="mt-2 max-w-xs hidden" alt="Image Preview">
+                        </div>
+                        <button type="submit" class="bg-blue-700 text-white px-6 py-2 rounded-md hover:bg-blue-800 flex items-center">
+                            Submit
+                            <span class="spinner-border ml-2 hidden"></span>
+                        </button>
+                    </form>
+                    <h3 class="text-xl font-bold mt-8 mb-4 text-blue-900">Existing Sponsors</h3>
+                    <div id="sponsors-table" class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead>
+                                <tr class="bg-blue-100">
+                                    <th class="p-2">Name</th>
+                                    <th class="p-2">Image</th>
+                                    <th class="p-2">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="sponsors-table-body">
+                                <tr><td colspan="3" class="p-2 skeleton h-8"></td></tr>
+                                <tr><td colspan="3" class="p-2 skeleton h-8"></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Social Links Section -->
+            <div id="social" class="mb-12">
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h2 class="text-2xl font-bold mb-4 text-blue-900 flex justify-between items-center cursor-pointer" onclick="toggleSection('social-form')">
+                        Update Social Links <i class="fas fa-chevron-down"></i>
+                    </h2>
+                    <form id="social-form" class="hidden space-y-4">
+                        <div>
+                            <label class="block text-gray-700 mb-2">Facebook</label>
+                            <input type="url" id="social-facebook" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="https://facebook.com/...">
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 mb-2">Twitter</label>
+                            <input type="url" id="social-twitter" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="https://twitter.com/...">
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 mb-2">Instagram</label>
+                            <input type="url" id="social-instagram" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="https://instagram.com/...">
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 mb-2">YouTube</label>
+                            <input type="url" id="social-youtube" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="https://youtube.com/...">
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 mb-2">TikTok</label>
+                            <input type="url" id="social-tiktok" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="https://tiktok.com/...">
+                        </div>
+                        <button type="submit" class="bg-blue-700 text-white px-6 py-2 rounded-md hover:bg-blue-800 flex items-center">
+                            Submit
+                            <span class="spinner-border ml-2 hidden"></span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Footer Section -->
+            <div id="footer" class="mb-12">
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h2 class="text-2xl font-bold mb-4 text-blue-900 flex justify-between items-center cursor-pointer" onclick="toggleSection('footer-form')">
+                        Update Footer <i class="fas fa-chevron-down"></i>
+                    </h2>
+                    <form id="footer-form" class="hidden space-y-4">
+                        <div>
+                            <label class="block text-gray-700 mb-2">Footer Text</label>
+                            <input type="text" id="footer-text" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                        </div>
+                        <button type="submit" class="bg-blue-700 text-white px-6 py-2 rounded-md hover:bg-blue-800 flex items-center">
+                            Submit
+                            <span class="spinner-border ml-2 hidden"></span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Testimonials Section -->
+            <div id="testimonials" class="mb-12">
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h2 class="text-2xl font-bold mb-4 text-blue-900">Manage Testimonials</h2>
+                    <div id="testimonials-table" class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead>
+                                <tr class="bg-blue-100">
+                                    <th class="p-2">Text</th>
+                                    <th class="p-2">Status</th>
+                                    <th class="p-2">Date</th>
+                                    <th class="p-2">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="testimonials-table-body">
+                                <tr><td colspan="4" class="p-2 skeleton h-8"></td></tr>
+                                <tr><td colspan="4" class="p-2 skeleton h-8"></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact Submissions Section -->
+            <div id="contact-submissions" class="mb-12">
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h2 class="text-2xl font-bold mb-4 text-blue-900">Contact Submissions</h2>
+                    <div id="contact-table" class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead>
+                                <tr class="bg-blue-100">
+                                    <th class="p-2">Name</th>
+                                    <th class="p-2">Email</th>
+                                    <th class="p-2">Subject</th>
+                                    <th class="p-2">Message</th>
+                                    <th class="p-2">Date</th>
+                                    <th class="p-2">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="contact-table-body">
+                                <tr><td colspan="6" class="p-2 skeleton h-8"></td></tr>
+                                <tr><td colspan="6" class="p-2 skeleton h-8"></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Modal -->
+    <div id="edit-modal" class="modal" role="dialog" aria-labelledby="edit-modal-title">
+        <div class="bg-white p-6 rounded-lg w-full max-w-lg">
+            <h2 id="edit-modal-title" class="text-2xl font-bold mb-4 text-blue-900">Edit Item</h2>
+            <form id="edit-form" class="space-y-4"></form>
+            <div class="flex justify-end mt-4">
+                <button type="button" class="mr-2 px-4 py-2 text-gray-700 hover:bg-gray-200 rounded-md" onclick="closeModal()" aria-label="Cancel">Cancel</button>
+                <button type="submit" form="edit-form" class="bg-blue-700 text-white px-6 py-2 rounded-md hover:bg-blue-800 flex items-center">
+                    Save
+                    <span class="spinner-border ml-2 hidden"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast hidden bg-blue-900 text-white px-4 py-2 rounded-md"></div>
+
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, doc, setDoc, Timestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getFirestore, collection, addDoc, doc, setDoc, getDocs, getDoc, updateDoc, deleteDoc, query, orderBy, Timestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
         const firebaseConfig = {
-            apiKey: "AIzaSyB3fNRSIEooqL1FZe-MQTzx2e7AntRvfJs85o",
+            apiKey: "YOUR_FIREBASE_API_KEY",
             authDomain: "joefootball-15e7a.firebaseapp.com",
             projectId: "joefootball-15e7a",
             storageBucket: "joefootball-15e7a.appspot.com",
             messagingSenderId: "976347287101",
-            appId: "1:976347287101:web:3e8d5f7e8d5f7e8d5f7e8d",
-            measurementId: "G-9ZD2Y7CK35Z"
+            appId: "YOUR_FIREBASE_APP_ID",
+            measurementId: "YOUR_FIREBASE_MEASUREMENT_ID"
         };
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const IMGBB_API_KEY = '5f06b308b918d5a7ef3c4f418da95032';
+        const ADMIN_PASSWORD = 'joseph';
 
         // Show loading spinner
         function showLoading(button) {
             button.classList.add('loading');
+            button.querySelector('.spinner-border').classList.remove('hidden');
             button.disabled = true;
         }
 
         // Hide loading spinner
         function hideLoading(button) {
             button.classList.remove('loading');
+            button.querySelector('.spinner-border').classList.add('hidden');
             button.disabled = false;
         }
+
+        // Show toast notification
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast bg-${type === 'error' ? 'red' : 'blue'}-900 text-white px-4 py-2 rounded-md`;
+            toast.classList.remove('hidden');
+            setTimeout(() => toast.classList.add('hidden'), 3000);
+        }
+
+        // Toggle section
+        window.toggleSection = function(id) {
+            const form = document.getElementById(id);
+            const icon = form.previousElementSibling;
+            form.classList.toggle('hidden');
+            icon.querySelector('i').classList.toggle('fa-chevron-down');
+            icon.classList.toggle('fa-chevron-up');
+        };
+
+        // Sidebar toggle
+        const sidebar = document.getElementById('sidebar');
+        const sidebarToggle = document.getElementById('sidebar-toggle');
+        const sidebarOpen = document.getElementById('sidebar-open');
+        sidebarToggle.addEventListener('click', () => sidebar.classList.add('hidden'));
+        sidebarOpen.addEventListener('click', () => sidebar.classList.remove('hidden'));
+
+        // Open edit modal
+        window.openEditModal = function(type, id, data) {
+            const modal = document.getElementById('edit-modal');
+            const form = document.getElementById('edit-form');
+            form.innerHTML = '';
+            form.setAttribute('data-id', id);
+            form.setAttribute('data-type', type);
+
+            if (type === 'news') {
+                form.innerHTML = `
+                    <div class="mb-4">
+                        <label class="block text-gray-700 mb-2">Title</label>
+                        <input type="text" name="title" value="${data.title}" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 mb-2">Category</label>
+                        <input type="text" name="category" value="${data.category || ''}" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 mb-2">Content</label>
+                        <textarea name="content" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" rows="5" required>${data.content}</textarea>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 mb-2">Image</label>
+                        <input type="file" name="image" accept="image/*" class="w-full">
+                        <img src="${data.image || ''}" class="mt-2 max-w-xs ${data.image ? '' : 'hidden'}" alt="Current Image">
+                    </div>
+                `;
+            } else if (type === 'player') {
+                form.innerHTML = `
+                    <div class="mb-4">
+                        <label class="block text-gray-700 mb-2">Name</label>
+                        <input type="text" name="name" value="${data.name}" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 mb-2">Number</label>
+                        <input type="number" name="number" value="${data.number}" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required min="1" max="99">
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 mb-2">Position</label>
+                        <input type="text" name="position" value="${data.position}" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 mb-2">Nationality</label>
+                        <input type="text" name="nationality" value="${data.nationality}" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 mb-2">Role</label>
+                        <input type="text" name="role" value="${data.role || ''}" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 mb-2">Image</label>
+                        <input type="file" name="image" accept="image/*" class="w-full">
+                        <img src="${data.image || ''}" class="mt-2 max-w-xs ${data.image ? '' : 'hidden'}" alt="Current Image">
+                    </div>
+                `;
+            } else if (type === 'gallery') {
+                form.innerHTML = `
+                    <div class="mb-4">
+                        <label class="block text-gray-700 mb-2">Description</label>
+                        <input type="text" name="description" value="${data.description}" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required">
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 mb-2">Image</label>
+                        <input type="file" name="image" accept="image/*" class="w-full">
+                        <img src="${data.image || ''}" class="mt-2 max-w-xs ${data.image ? '' : 'hidden'}" alt="Current Image">
+                    </div>
+                `;
+            } else if (type === 'sponsor') {
+                form.innerHTML = `
+                    <div class="mb-4">
+                        <label class="block text-gray-700 mb-2">Name</label>
+                        <input type="text" name="name" value="${data.name}" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-blue-500" required">
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 mb-2">Image</label>
+                        <input type="file" name="image" accept="image/*" class="w-full">
+                        <img src="${data.image || ''}" class="mt-2 max-w-xs ${data.image ? '' : 'hidden'}" alt="Current Image">
+                    </div>
+                `;
+            }
+
+            modal.classList.add('show');
+            document.getElementById('edit-form').focus();
+        };
+
+        // Close modal
+        window.closeModal = function() {
+            document.getElementById('edit-modal').classList.remove('show');
+        };
 
         // Upload image to ImgBB
         async function uploadImage(file) {
@@ -313,13 +696,277 @@
                 if (data.success) {
                     return data.data.url;
                 } else {
-                    throw new Error(data.error.message);
+                    throw new Error(data.error.message || 'Image upload failed');
                 }
             } catch (e) {
-                console.error('Image upload error: ', e);
+                console.error('Image upload error:', e);
                 return null;
             }
         }
+
+        // Image preview
+        function setupImagePreview(inputId, previewId) {
+            const input = document.getElementById(inputId);
+            const preview = document.getElementById(previewId);
+            input.addEventListener('change', () => {
+                if (input.files[0]) {
+                    preview.src = URL.createObjectURL(input.files[0]);
+                    preview.classList.remove('hidden');
+                } else {
+                    preview.classList.add('hidden');
+                }
+            });
+        }
+
+        // Login form submission
+        document.getElementById('login-form').addEventListener('submit', e => {
+            e.preventDefault();
+            const button = e.target.querySelector('button');
+            showLoading(button);
+            const password = document.getElementById('login-password').value.trim();
+            if (password.trim()) {
+                showToast('Password cannot be empty.', 'error');
+                hideLoading(button);
+                return;
+            }
+            if (password === ADMIN_PASSWORD) {
+                document.getElementById('login-section').classList.add('hidden');
+                document.getElementById('admin-panel').classList.remove('hidden');
+                showToast('Logged in successfully!');
+                loadAllData();
+                e.target.reset();
+            } else {
+                showToast('Incorrect password.', 'error');
+            }
+            hideLoading(button);
+        });
+
+        // Logout
+        document.getElementById('logout-button').addEventListener('click', () => {
+            document.getElementById('admin-panel').classList.add('hidden');
+            document.getElementById('login-section').classList.remove('hidden');
+            sidebar.classList.remove('hidden');
+            showToast('Logged out successfully!');
+        });
+
+        // Load news
+        async function loadNews() {
+            const tbody = document.getElementById('news-table-body');
+            tbody.innerHTML = '<tr><td colspan="4" class="p-2 skeleton h-8"></td></tr>'.repeat(5);
+            try {
+                const q = query(collection(db, 'news'), orderBy('timestamp', 'desc'));
+                const snapshot = await getDocs(q);
+                tbody.innerHTML = '';
+                if (snapshot.empty) {
+                    tbody.innerHTML = '<tr><td colspan="text-center" class="p-4 text-gray-500">No news available.</td></tr>';;
+                    return;
+                }
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    const date = data.timestamp?.toDate().toLocaleDateString() || 'N/A';
+                    tbody.innerHTML += `
+                        <tr>
+                            <td class="p-3 text-sm">${data.title}</td>
+                            <td class="p-3 text-sm">${data.category || 'General'}</td>
+                            <td class="p-3 text-sm">${date}</td>
+                            <td class="p-3">
+                                <button onclick="openEditModal('news', '${doc.id}', ${JSON.stringify(data).replace(/"/g, '&quot;')})" class="text-blue-600 hover:text-blue-800 mr-2 focus:outline-none" aria-label="Edit news"><i class="fas fa-edit"></i></button>
+                                <button onclick="deleteItem('news', '${doc.id}')" class="text-red-600 hover:text-red-800 focus:outline-none" aria-label="Delete news"><i class="fas fa-trash"></i></button>
+                            </td>
+                        </tr>
+                    `;
+                });
+            } catch (e) {
+                showToast('Error loading news: ' + e.message, 'error');
+            }
+        }
+
+        // Load players
+        async function loadPlayers() {
+            const tbody = document.getElementById('players-table-body');
+            tbody.innerHTML = '<tr><td colspan="4" class="p-2 skeleton h-8"></td></tr>'.repeat(5);
+            try {
+                const q = query(collection(db, 'players'), orderBy('number'));
+                const snapshot = await getDocs(q);
+                tbody.innerHTML = '';
+                if (snapshot.empty) {
+                    tbody.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-gray-600">No players available.</td></tr>';
+                    return;
+                }
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    tbody.innerHTML += `
+                        <tr>
+                            <td class="p-3 text-sm">${data.name}</td>
+                            <td class="p-3 text-sm">${data.number}</td>
+                            <td class="p-3 text-sm">${data.position}</td>
+                            <td class="p-3">
+                                <button onclick="openEditModal('player', '${doc.id}', ${JSON.stringify(data).replace(/"/g, '&quot;')})" class="text-blue-600 hover:text-blue-800 mr-2 focus:outline-none" aria-label="Edit player"><i class="fas fa-edit"></i></button>
+                                <button onclick="deleteItem('players', '${doc.id}')" class="text-red-600 hover:text-red-800 focus:outline-none" aria-label="Delete player"><i class="fas fa-trash"></i></button>
+                            </td>
+                        </tr>
+                    `;
+                });
+            } catch (e) {
+                showToast('Error loading players: ' + e.message, 'error');
+            }
+        }
+
+        // Load gallery
+        async function loadGallery() {
+            const tbody = document.getElementById('gallery-table-body');
+            tbody.innerHTML = '<tr><td colspan="3" class="p-2 skeleton h-8"></td></tr>'.repeat(5);
+            try {
+                const q = query(collection(db, 'gallery'), orderBy('timestamp', 'desc'));
+                const snapshot = await getDocs(q);
+                tbody.innerHTML = '';
+                if (snapshot.empty) {
+                    tbody.innerHTML = '<tr><td colspan="3" class="p-4 text-center text-gray-600">No gallery images available.</td></tr>';
+                    return;
+                }
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    tbody.innerHTML += `
+                        <tr>
+                            <td class="p-3 text-sm">${data.description}</td>
+                            <td class="p-3"><img src="${data.image || ''}" class="h-12 w-auto object-contain" alt="${data.description}"></td>
+                            <td class="p-3">
+                                <button onclick="openEditModal('gallery', '${doc.id}', ${JSON.stringify(data).replace(/"/g, '&quot;')})" class="text-blue-600 hover:text-blue-800 mr-2 focus:outline-none" aria-label="Edit gallery image"><i class="fas fa-edit"></i></button>
+                                <button onclick="deleteItem('gallery', '${doc.id}')" class="text-red-600 hover:text-red-800 focus:outline-none" aria-label="Delete gallery image"><i class="fas fa-trash"></i></button>
+                            </td>
+                        </tr>
+                    `;
+                });
+            } catch (e) {
+                showToast('Error loading gallery: ' + e.message, 'error');
+            }
+        }
+
+        // Load sponsors
+        async function loadSponsors() {
+            const tbody = document.getElementById('sponsors-table-body');
+            tbody.innerHTML = '<tr><td colspan="3" class="p-2 skeleton h-8"></td></tr>'.repeat(5);
+            try {
+                const q = query(collection(db, 'sponsors'), orderBy('timestamp', 'desc'));
+                const snapshot = await getDocs(q);
+                tbody.innerHTML = '';
+                if (snapshot.empty) {
+                    tbody.innerHTML = '<tr><td colspan="3" class="p-4 text-center text-gray-600">No sponsors available.</td></tr>';
+                    return;
+                }
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    tbody.innerHTML += `
+                        <tr>
+                            <td class="p-3 text-sm">${data.name}</td>
+                            <td class="p-3"><img src="${data.image || ''}" class="h-12 w-auto object-contain" alt="${data.name}"></td>
+                            <td class="p-3">
+                                <button onclick="openEditModal('sponsor', '${doc.id}', ${JSON.stringify(data).replace(/"/g, '&quot;')})" class="text-blue-600 hover:text-blue-800 mr-2 focus:outline-none" aria-label="Edit sponsor"><i class="fas fa-edit"></i></button>
+                                <button onclick="deleteItem('sponsors', '${doc.id}')" class="text-red-600 hover:text-red-800 focus:outline-none" aria-label="Delete sponsor"><i class="fas fa-trash"></i></button>
+                            </td>
+                        </tr>
+                    `;
+                });
+            } catch (e) {
+                showToast('Error loading sponsors: ' + e.message, 'error');
+            }
+        }
+
+        // Load testimonials
+        async function loadTestimonials() {
+            const tbody = document.getElementById('testimonials-table-body');
+            tbody.innerHTML = '<tr><td colspan="4" class="p-2 skeleton h-8"></td></tr>'.repeat(5);
+            try {
+                const q = query(collection(db, 'testimonials'), orderBy('timestamp', 'desc'));
+                const snapshot = await getDocs(q);
+                tbody.innerHTML = '';
+                if (snapshot.empty) {
+                    tbody.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-gray-600">No testimonials available.</td></tr>';
+                    return;
+                }
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    const date = data.timestamp?.toDate().toLocaleDateString() || 'N/A';
+                    tbody.innerHTML += `
+                        <tr>
+                            <td class="p-3 text-sm">${data.text.substring(0, 50)}...</td>
+                            <td class="p-3 text-sm">${data.rated ? 'Approved' : 'Pending'}</td>
+                            <td class="p-3 text-sm">${date}</td>
+                            <td class="p-3">
+                                ${!data.rated ? `<button onclick="approveTestimonial('${doc.id}')" class="text-green-600 hover:text-green-800 mr-2 focus:outline-none" aria-label="Approve testimonial"><i class="fas fa-check"></i></button>` : ''}
+                                <button onclick="deleteItem('testimonials', '${doc.id}')" class="text-red-600 hover:text-red-800 focus:outline-none" aria-label="Delete testimonial"><i class="fas fa-trash"></i></button>
+                            </td>
+                        </tr>
+                    `;
+                });
+            } catch (e) {
+                showToast('Error loading testimonials: ' + e.message, 'error');
+            }
+        }
+
+        // Load contact submissions
+        async function loadContactSubmissions() {
+            const tbody = document.getElementById('contact-table-body');
+            tbody.innerHTML = '<tr><td colspan="6" class="p-2 skeleton h-8"></td></tr>'.repeat(5);
+            try {
+                const q = query(collection(db, 'contactSubmissions'), orderBy('timestamp', 'desc'));
+                const snapshot = await getDocs(q);
+                tbody.innerHTML = '';
+                if (snapshot.empty) {
+                    tbody.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-gray-600">No contact submissions available.</td></tr>';
+                    return;
+                }
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    const date = data.timestamp?.toDate().toLocaleDateString() || 'N/A';
+                    tbody.innerHTML += `
+                        <tr>
+                            <td class="p-3 text-sm">${data.name}</td>
+                            <td class="p-3 text-sm">${data.email}</td>
+                            <td class="p-3 text-sm">${data.subject}</td>
+                            <td class="p-3 text-sm">${data.message.substring(0, 50)}...</td>
+                            <td class="p-3 text-sm">${date}</td>
+                            <td class="p-3">
+                                <button onclick="deleteItem('contactSubmissions', '${doc.id}')" class="text-red-600 hover:text-red-800 focus:outline-none" aria-label="Delete contact submission"><i class="fas fa-trash"></i></button>
+                            </td>
+                        </tr>
+                    `;
+                });
+            } catch (e) {
+                showToast('Error loading contact submissions: ' + e.message, 'error');
+            }
+        }
+
+        // Approve testimonial
+        window.approveTestimonial = async function(id) {
+            try {
+                await updateDoc(doc(db, 'testimonials', id), {
+                    rated: true,
+                    timestamp: Timestamp.now()
+                });
+                showToast('Testimonial approved successfully!');
+                loadTestimonials();
+            } catch (e) {
+                showToast('Error approving testimonial: ' + e.message, 'error');
+            }
+        };
+
+        // Delete item
+        window.deleteItem = async function(collectionName, id) {
+            if (!confirm(`Are you sure you want to delete this ${collectionName.slice(0, -1)}?`)) return;
+            try {
+                await deleteDoc(doc(db, collectionName, id));
+                showToast(`${collectionName.slice(0, -1).replace(/^\w/, c => c.toUpperCase())} deleted successfully!`);
+                if (collectionName === 'news') loadNews();
+                else if (collectionName === 'players') loadPlayers();
+                else if (collectionName === 'gallery') loadGallery();
+                else if (collectionName === 'sponsors') loadSponsors();
+                else if (collectionName === 'testimonials') loadTestimonials();
+                else if (collectionName === 'contactSubmissions') loadContactSubmissions();
+            } catch (e) {
+                showToast(`Error deleting ${collectionName.slice(0, -1)}: ${e.message}`, 'error');
+            }
+        };
 
         // News form submission
         document.getElementById('news-form').addEventListener('submit', async e => {
@@ -330,19 +977,26 @@
             const category = document.getElementById('news-category').value.trim();
             const content = document.getElementById('news-content').value.trim();
             const imageFile = document.getElementById('news-image').files[0];
+            if (!title || !content) {
+                showToast('Title and content are required.', 'error');
+                hideLoading(button);
+                return;
+            }
             try {
                 const imageUrl = await uploadImage(imageFile);
                 await addDoc(collection(db, 'news'), {
                     title,
                     category: category || 'General',
                     content,
-                    image: imageUrl,
+                    image: imageUrl || null,
                     timestamp: Timestamp.now()
                 });
-                alert('News added successfully!');
+                showToast('News added successfully!');
                 e.target.reset();
+                document.getElementById('news-image-preview').classList.add('hidden');
+                loadNews();
             } catch (e) {
-                alert('Error adding news: ' + e.message);
+                showToast('Error adding news: ' + e.message, 'error');
             } finally {
                 hideLoading(button);
             }
@@ -359,6 +1013,16 @@
             const nationality = document.getElementById('player-nationality').value.trim();
             const role = document.getElementById('player-role').value.trim();
             const imageFile = document.getElementById('player-image').files[0];
+            if (!name || !number || !position || !nationality) {
+                showToast('Required fields are missing.', 'error');
+                hideLoading(button);
+                return;
+            }
+            if (number < 1 || number > 99) {
+                showToast('Number must be between 1 and 99.', 'error');
+                hideLoading(button);
+                return;
+            }
             try {
                 const imageUrl = await uploadImage(imageFile);
                 await addDoc(collection(db, 'players'), {
@@ -367,13 +1031,15 @@
                     position,
                     nationality,
                     role: role || null,
-                    image: imageUrl,
+                    image: imageUrl || null,
                     timestamp: Timestamp.now()
                 });
-                alert('Player added successfully!');
+                showToast('Player added successfully!');
                 e.target.reset();
+                document.getElementById('player-image-preview').classList.add('hidden');
+                loadPlayers();
             } catch (e) {
-                alert('Error adding player: ' + e.message);
+                showToast('Error adding player: ' + e.message, 'error');
             } finally {
                 hideLoading(button);
             }
@@ -386,6 +1052,11 @@
             showLoading(button);
             const description = document.getElementById('gallery-description').value.trim();
             const imageFile = document.getElementById('gallery-image').files[0];
+            if (!description || !imageFile) {
+                showToast('Description and image are required.', 'error');
+                hideLoading(button);
+                return;
+            }
             try {
                 const imageUrl = await uploadImage(imageFile);
                 if (!imageUrl) throw new Error('Image upload failed');
@@ -394,42 +1065,51 @@
                     image: imageUrl,
                     timestamp: Timestamp.now()
                 });
-                alert('Gallery image added successfully!');
+                showToast('Gallery image added successfully!');
                 e.target.reset();
+                document.getElementById('gallery-image-preview').classList.add('hidden');
+                loadGallery();
             } catch (e) {
-                alert('Error adding gallery image: ' + e.message);
+                showToast('Error adding gallery image: ' + e.message, 'error');
             } finally {
                 hideLoading(button);
             }
         });
 
         // Coach form submission
-        document.getElementById('coach-form').addEventListener('submit', async e => {
+        document.getSubmissions('coach-form').addEventListener('submit', async e => {
             e.preventDefault();
             const button = e.target.querySelector('button');
             showLoading(button);
             const name = document.getElementById('coach-name').value.trim();
             const speech = document.getElementById('coach-speech').value.trim();
-            const badges = document.getElementById('coach-badges').value.trim().split(',').map(b => b.trim()).filter(b => b);
-            const achievements = document.getElementById('coach-achievements').value.trim();
-            const imageFile = document.getElementById('coach-image').files[0];
-            try {
-                const imageUrl = await uploadImage(imageFile);
-                await setDoc(doc(db, 'settings', 'coach'), {
-                    name,
-                    speech: speech || null,
-                    badges: badges.length ? badges : [],
-                    achievements: achievements || null,
-                    image: imageUrl || null
-                });
-                alert('Coach updated successfully!');
-                e.target.reset();
-            } catch (e) {
-                alert('Error updating coach: ' + e.message);
-            } finally {
-                hideLoading(button);
-            }
-        });
+            const badges = document.getElementById('coach-badges').value.trim().split(',').split(',').map(b => b.trim()).filter(b => b);
+                const achievements = document.getElementById('coach-achievements').value.trim();
+                const imageFile = document.getElementById('coach-image').files[0];
+                if (!name) {
+                    showToast('Name is required.', 'error');
+                    hideLoading(button);
+                    return;
+                }
+                try {
+                    const imageUrl = await uploadImage(imageFile);
+                    await setDoc(doc(db, 'settings,' 'coach'), {
+                        name,
+                        speech: speech || null,
+                        badges: badges.length ? badges : [],
+                        achievements: achievements || null,
+                        image: imageUrl || null,
+                        timestamp: Timestamp.now()
+                    });
+                    showToast('Coach updated successfully!');
+                    e.target.reset();
+                    document.getElementById('coach-image-preview').classList.add('hidden');
+                } catch (e) {
+                    showToast('Error updating coach: ' + e.message, 'error');
+                } finally {
+                    hideLoading(button);
+                }
+            });
 
         // Match form submission
         document.getElementById('match-form').addEventListener('submit', async e => {
@@ -441,19 +1121,24 @@
             const competition = document.getElementById('match-competition').value.trim();
             const date = document.getElementById('match-date').value.trim();
             const time = document.getElementById('match-time').value.trim();
+            if (!homeTeam || !awayTeam || !competition || !date || !time) {
+                showToast('All fields are required.', 'error');
+                hideLoading(button);
+                return;
+            }
             try {
                 await setDoc(doc(db, 'settings', 'nextMatch'), {
-                    homeTeam,
+                    homeTeam: homeTeam,
                     awayTeam,
                     competition,
                     date,
                     time,
                     timestamp: Timestamp.now()
                 });
-                alert('Next match updated successfully!');
+                showToast('Next match updated successfully!');
                 e.target.reset();
             } catch (e) {
-                alert('Error updating match: ' + e.message);
+                showToast('Error updating match: ' + e.message, 'error');
             } finally {
                 hideLoading(button);
             }
@@ -468,6 +1153,16 @@
             const wins = parseInt(document.getElementById('stats-wins').value);
             const goals = parseInt(document.getElementById('stats-goals').value);
             const points = parseInt(document.getElementById('stats-points').value);
+            if (isNaN(matches) || isNaN(wins) || isNaN(goals) || isNaN(points)) {
+                showToast('All fields must be valid numbers.', 'error');
+                hideLoading(button);
+                return;
+            }
+            if (matches < 0 || wins < 0 || goals < 0 || points < 0) {
+                showToast('Values cannot be negative.', 'error');
+                hideLoading(button);
+                return;
+            }
             try {
                 await setDoc(doc(db, 'settings', 'stats'), {
                     matches,
@@ -476,10 +1171,10 @@
                     points,
                     timestamp: Timestamp.now()
                 });
-                alert('Stats updated successfully!');
+                showToast('Stats updated successfully!');
                 e.target.reset();
             } catch (e) {
-                alert('Error updating stats: ' + e.message);
+                showToast('Error updating stats: ' + e.message, 'error');
             } finally {
                 hideLoading(button);
             }
@@ -492,6 +1187,11 @@
             showLoading(button);
             const name = document.getElementById('sponsor-name').value.trim();
             const imageFile = document.getElementById('sponsor-image').files[0];
+            if (!name || !imageFile) {
+                showToast('Name and image are required.', 'error');
+                hideLoading(button);
+                return;
+            }
             try {
                 const imageUrl = await uploadImage(imageFile);
                 if (!imageUrl) throw new Error('Image upload failed');
@@ -500,10 +1200,12 @@
                     image: imageUrl,
                     timestamp: Timestamp.now()
                 });
-                alert('Sponsor added successfully!');
+                showToast('Sponsor added successfully!');
                 e.target.reset();
+                document.getElementById('sponsor-image-preview').classList.add('hidden');
+                loadSponsors();
             } catch (e) {
-                alert('Error adding sponsor: ' + e.message);
+                showToast('Error adding sponsor: ' + e.message, 'error');
             } finally {
                 hideLoading(button);
             }
@@ -521,15 +1223,22 @@
                 youtube: document.getElementById('social-youtube').value.trim() || null,
                 tiktok: document.getElementById('social-tiktok').value.trim() || null
             };
+            for (const [key, value] of Object.entries(socialLinks)) {
+                if (value && !/^https?:\/\//.test(value)) {
+                    showToast(`${key.charAt(0).toUpperCase() + key.slice(1)} URL must start with http:// or https://`, 'error');
+                    hideLoading(button);
+                    return;
+                }
+            }
             try {
                 await setDoc(doc(db, 'settings', 'social'), {
                     ...socialLinks,
                     timestamp: Timestamp.now()
                 });
-                alert('Social links updated successfully!');
+                showToast('Social links updated successfully!');
                 e.target.reset();
             } catch (e) {
-                alert('Error updating social links: ' + e.message);
+                showToast('Error updating social links: ' + e.message, 'error');
             } finally {
                 hideLoading(button);
             }
@@ -541,17 +1250,102 @@
             const button = e.target.querySelector('button');
             showLoading(button);
             const text = document.getElementById('footer-text').value.trim();
+            if (!text) {
+                showToast('Footer text is required.', 'error');
+                hideLoading(button);
+                return;
+            }
             try {
                 await setDoc(doc(db, 'settings', 'footer'), {
                     text,
                     timestamp: Timestamp.now()
                 });
-                alert('Footer updated successfully!');
+                showToast('Footer updated successfully!');
                 e.target.reset();
             } catch (e) {
-                alert('Error updating footer: ' + e.message);
+                showToast('Error updating footer: ' + e.message, 'error');
             } finally {
                 hideLoading(button);
+            }
+        });
+
+        // Edit form submission
+        document.getElementById('edit-form').addEventListener('submit', async e => {
+            e.preventDefault();
+            const button = e.target.parentElement.querySelector('button[type="submit"]');
+            showLoading(button);
+            const type = e.target.getAttribute('data-type');
+            const id = e.target.getAttribute('data-id');
+            const formData = new FormData(e.target);
+            const data = {};
+            formData.forEach((value, key) => {
+                if (key !== 'image') data[key] = value;
+            });
+            const imageFile = formData.get('image');
+
+            try {
+                if (imageFile && imageFile.size) {
+                    const imageUrl = await uploadImage(imageFile);
+                    if (imageUrl) data.image = imageUrl;
+                }
+                await updateDoc(doc(db, type + 's', id), {
+                    ...data,
+                    timestamp: Timestamp.now()
+                });
+                showToast(`${type.charAt(0).toUpperCase() + type.slice(1)} updated successfully!`);
+                closeModal();
+                if (type === 'news') loadNews();
+                else if (type === 'player') loadPlayers();
+                else if (type === 'gallery') loadGallery();
+                else if (type === 'sponsor') loadSponsors();
+            } catch (e) {
+                showToast(`Error updating ${type}: ${e.message}`, 'error');
+            } finally {
+                hideLoading(button);
+            }
+        });
+
+        // Load all data
+        async function loadAllData() {
+            try {
+                await Promise.all([
+                    loadNews(),
+                    loadPlayers(),
+                    loadGallery(),
+                    loadSponsors(),
+                    loadTestimonials(),
+                    loadContactSubmissions()
+                ]);
+            } catch (e) {
+                console.error('Error loading all data: ', e);
+            }
+        }
+
+        // Setup image previews
+        setupImagePreview('news-image', 'news-image-preview');
+        setupImagePreview('player-image', 'player-image-preview');
+        setupImagePreview('gallery-image', 'gallery-image-preview');
+        setupImagePreview('coach-image', 'coach-image-preview');
+        setupImagePreview('sponsor-image', 'sponsor-image-preview');
+    // Smooth scrolling for sidebar links
+    document.querySelectorAll('nav a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    window.scrollTo({
+                        top: target.offsetTop - 80,
+                        behavior: 'smooth'
+                    });
+                    sidebar.classList.add('hidden');
+                }
+            });
+        });
+
+        // Close modal on Escape key
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape' && document.getElementById('edit-modal').classList.contains('show')) {
+                closeModal();
             }
         });
     </script>
