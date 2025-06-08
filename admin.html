@@ -788,176 +788,201 @@
             </div>
         </div>
     </div>
+  <script type="module">
+    // Import Firebase SDKs
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
+    import { getFirestore, collection, doc, getDoc, getDocs, addDoc, updateDoc, deleteDoc, query, orderBy, Timestamp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js";
+    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-storage.js";
+    import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-auth.js";
 
-    <script>
-        // Toggle sidebar
-        document.getElementById('toggle-sidebar').addEventListener('click', function() {
+    // Create global namespace to prevent conflicts
+    window.JoeFC = window.JoeFC || {};
+
+    // Firebase configuration and initialization
+    JoeFC.firebase = (() => {
+        const firebaseConfig = {
+            apiKey: "AIzaSyBBSNRSIEooqL1FZe-MQTzx2AntRvfJ85o",
+            authDomain: "joefootball-15e7a.firebaseapp.com",
+            databaseURL: "https://joefootball-15e7a-default-rtdb.firebaseio.com",
+            projectId: "joefootball-15e7a",
+            storageBucket: "joefootball-15e7a.firebasestorage.app",
+            messagingSenderId: "976347287101",
+            appId: "1:976347287101:web:b13786927105f963986454",
+            measurementId: "G-9ZD2Y7CK35"
+        };
+        const app = initializeApp(firebaseConfig);
+        return {
+            db: getFirestore(app),
+            storage: getStorage(app),
+            auth: getAuth(app)
+        };
+    })();
+
+    // UI-related functions
+    JoeFC.ui = {
+        toggleSidebar: () => {
             const sidebar = document.getElementById('sidebar');
             const content = document.getElementById('content');
             sidebar.classList.toggle('collapsed');
             content.classList.toggle('expanded');
-        });
+        },
 
-        // Show tab content
-        function showTab(tabId) {
-            // Hide all tab contents
-            document.querySelectorAll('.tab-content').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            
-            // Show selected tab content
+        showTab: (tabId) => {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
             document.getElementById(tabId).classList.add('active');
-            
-            // Update active state of buttons
-            document.querySelectorAll('.tab-button').forEach(button => {
-                button.classList.remove('active');
-            });
-            event.currentTarget.classList.add('active');
-            
-            // Update page title
-            const pageTitle = document.getElementById('page-title');
-            pageTitle.textContent = event.currentTarget.querySelector('.sidebar-text').textContent;
-        }
+            document.querySelectorAll('.tab-button').forEach(button => button.classList.remove('active'));
+            document.querySelector(`.tab-button[data-tab="${tabId}"]`).classList.add('active');
+            document.getElementById('page-title').textContent = document.querySelector(`.tab-button[data-tab="${tabId}"] .sidebar-text`).textContent;
 
-        // Modal functions
-        function openPlayerModal(playerId = null) {
+            const loadFunctions = {
+                dashboard: JoeFC.data.loadDashboard,
+                players: JoeFC.data.loadPlayers,
+                matches: JoeFC.data.loadMatches,
+                news: JoeFC.data.loadNews,
+                gallery: JoeFC.data.loadGallery,
+                coach: JoeFC.data.loadCoach,
+                sponsors: JoeFC.data.loadSponsors,
+                settings: JoeFC.data.loadSettings
+            };
+            if (loadFunctions[tabId]) loadFunctions[tabId]();
+        },
+
+        openPlayerModal: (playerId = null) => {
+            const modalTitle = document.getElementById('player-modal-title');
+            const form = document.getElementById('player-form');
+            const imagePreview = document.getElementById('player-image-preview');
             if (playerId) {
-                // Load player data if editing
-                document.getElementById('player-modal-title').textContent = 'Edit Player';
+                modalTitle.textContent = 'Edit Player';
                 document.getElementById('player-id').value = playerId;
-                // Here you would fetch player data and populate the form
+                getDoc(doc(JoeFC.firebase.db, 'players', playerId)).then(doc => {
+                    if (doc.exists()) {
+                        const data = doc.data();
+                        document.getElementById('player-name').value = data.name || '';
+                        document.getElementById('player-number').value = data.number || '';
+                        document.getElementById('player-position').value = data.position || '';
+                        document.getElementById('player-nationality').value = data.nationality || '';
+                        document.getElementById('player-role').value = data.role || '';
+                        imagePreview.src = data.image || 'https://via.placeholder.com/300x400?text=Player';
+                    }
+                }).catch(e => console.error('Error loading player:', e));
             } else {
-                document.getElementById('player-modal-title').textContent = 'Add New Player';
+                modalTitle.textContent = 'Add New Player';
                 document.getElementById('player-id').value = '';
-                document.getElementById('player-form').reset();
-                document.getElementById('player-image-preview').src = 'https://via.placeholder.com/300x400?text=Player';
+                form.reset();
+                imagePreview.src = 'https://via.placeholder.com/300x400?text=Player';
             }
             document.getElementById('player-modal').classList.remove('hidden');
-        }
+        },
 
-        function openMatchModal(matchId = null) {
+        openMatchModal: (matchId = null) => {
+            const modalTitle = document.getElementById('match-modal-title');
+            const form = document.getElementById('match-form');
             if (matchId) {
-                // Load match data if editing
-                document.getElementById('match-modal-title').textContent = 'Edit Match';
+                modalTitle.textContent = 'Edit Match';
                 document.getElementById('match-id').value = matchId;
-                // Here you would fetch match data and populate the form
+                getDoc(doc(JoeFC.firebase.db, 'matches', matchId)).then(doc => {
+                    if (doc.exists()) {
+                        const data = doc.data();
+                        document.getElementById('match-date').value = data.date || '';
+                        document.getElementById('match-time').value = data.time || '';
+                        document.getElementById('match-home').value = data.homeTeam || 'Joe FC';
+                        document.getElementById('match-away').value = data.awayTeam || '';
+                        document.getElementById('match-location').value = data.location || '';
+                        document.getElementById('match-competition').value = data.competition || '';
+                        document.getElementById('match-status').value = data.status || 'Upcoming';
+                        document.getElementById('match-description').value = data.description || '';
+                        document.getElementById('result-fields').classList.toggle('hidden', data.status !== 'Finished');
+                        if (data.status === 'Finished') {
+                            document.getElementById('match-home-score').value = data.result?.homeScore || 0;
+                            document.getElementById('match-away-score').value = data.result?.awayScore || 0;
+                        }
+                    }
+                }).catch(e => console.error('Error loading match:', e));
             } else {
-                document.getElementById('match-modal-title').textContent = 'Add New Match';
+                modalTitle.textContent = 'Add New Match';
                 document.getElementById('match-id').value = '';
-                document.getElementById('match-form').reset();
+                form.reset();
                 document.getElementById('match-home').value = 'Joe FC';
                 document.getElementById('result-fields').classList.add('hidden');
             }
             document.getElementById('match-modal').classList.remove('hidden');
-        }
+        },
 
-        function openNewsModal(newsId = null) {
+        openNewsModal: (newsId = null) => {
+            const modalTitle = document.getElementById('news-modal-title');
+            const form = document.getElementById('news-form');
+            const imagePreview = document.getElementById('news-image-preview');
             if (newsId) {
-                // Load news data if editing
-                document.getElementById('news-modal-title').textContent = 'Edit News Article';
+                modalTitle.textContent = 'Edit News Article';
                 document.getElementById('news-id').value = newsId;
-                // Here you would fetch news data and populate the form
+                getDoc(doc(JoeFC.firebase.db, 'news', newsId)).then(doc => {
+                    if (doc.exists()) {
+                        const data = doc.data();
+                        document.getElementById('news-title').value = data.title || '';
+                        document.getElementById('news-category').value = data.category || '';
+                        document.getElementById('news-date').value = data.date || '';
+                        document.getElementById('news-content').value = data.content || '';
+                        imagePreview.src = data.image || 'https://via.placeholder.com/800x450?text=News';
+                    }
+                }).catch(e => console.error('Error loading news:', e));
             } else {
-                document.getElementById('news-modal-title').textContent = 'Add News Article';
+                modalTitle.textContent = 'Add News Article';
                 document.getElementById('news-id').value = '';
-                document.getElementById('news-form').reset();
-                document.getElementById('news-image-preview').src = 'https://via.placeholder.com/800x450?text=News';
+                form.reset();
+                imagePreview.src = 'https://via.placeholder.com/800x450?text=News';
             }
             document.getElementById('news-modal').classList.remove('hidden');
-        }
+        },
 
-        function openSponsorModal(sponsorId = null) {
+        openSponsorModal: (sponsorId = null) => {
+            const modalTitle = document.getElementById('sponsor-modal-title');
+            const form = document.getElementById('sponsor-form');
+            const imagePreview = document.getElementById('sponsor-logo-preview');
             if (sponsorId) {
-                // Load sponsor data if editing
-                document.getElementById('sponsor-modal-title').textContent = 'Edit Sponsor';
+                modalTitle.textContent = 'Edit Sponsor';
                 document.getElementById('sponsor-id').value = sponsorId;
-                // Here you would fetch sponsor data and populate the form
+                getDoc(doc(JoeFC.firebase.db, 'sponsors', sponsorId)).then(doc => {
+                    if (doc.exists()) {
+                        const data = doc.data();
+                        document.getElementById('sponsor-name').value = data.name || '';
+                        document.getElementById('sponsor-type').value = data.type || '';
+                        document.getElementById('sponsor-website').value = data.website || '';
+                        imagePreview.src = data.image || 'https://via.placeholder.com/300x150?text=Sponsor+Logo';
+                    }
+                }).catch(e => console.error('Error loading sponsor:', e));
             } else {
-                document.getElementById('sponsor-modal-title').textContent = 'Add New Sponsor';
+                modalTitle.textContent = 'Add New Sponsor';
                 document.getElementById('sponsor-id').value = '';
-                document.getElementById('sponsor-form').reset();
-                document.getElementById('sponsor-logo-preview').src = 'https://via.placeholder.com/300x150?text=Sponsor+Logo';
+                form.reset();
+                imagePreview.src = 'https://via.placeholder.com/300x150?text=Sponsor+Logo';
             }
             document.getElementById('sponsor-modal').classList.remove('hidden');
-        }
+        },
 
-        function closeModal(modalId) {
+        closeModal: (modalId) => {
             document.getElementById(modalId).classList.add('hidden');
-        }
+        },
 
-        function showConfirmModal(message, callback) {
+        showConfirmModal: (message, callback) => {
             document.getElementById('confirm-message').textContent = message;
             document.getElementById('confirm-modal').classList.remove('hidden');
-            
             const confirmButton = document.getElementById('confirm-action');
-            // Remove previous event listeners
             confirmButton.replaceWith(confirmButton.cloneNode(true));
-            
-            document.getElementById('confirm-action').addEventListener('click', function() {
+            document.getElementById('confirm-action').addEventListener('click', () => {
                 callback();
-                closeModal('confirm-modal');
+                JoeFC.ui.closeModal('confirm-modal');
             });
-        }
+        },
 
-        // Image upload functions
-        function uploadPlayerImage() {
-            const fileInput = document.getElementById('player-image');
-            if (fileInput.files && fileInput.files[0]) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    document.getElementById('player-image-preview').src = e.target.result;
-                };
-                reader.readAsDataURL(fileInput.files[0]);
-            }
-        }
-
-        function uploadCoachImage() {
-            const fileInput = document.getElementById('coach-image');
-            if (fileInput.files && fileInput.files[0]) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    document.getElementById('coach-image-preview').src = e.target.result;
-                };
-                reader.readAsDataURL(fileInput.files[0]);
-            }
-        }
-
-        function uploadNewsImage() {
-            const fileInput = document.getElementById('news-image');
-            if (fileInput.files && fileInput.files[0]) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    document.getElementById('news-image-preview').src = e.target.result;
-                };
-                reader.readAsDataURL(fileInput.files[0]);
-            }
-        }
-
-        function uploadSponsorLogo() {
-            const fileInput = document.getElementById('sponsor-logo');
-            if (fileInput.files && fileInput.files[0]) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    document.getElementById('sponsor-logo-preview').src = e.target.result;
-                // Adjust object fit for better logo display
-                    document.getElementById('sponsor-logo-preview').classList.add('object-contain');
-                    document.getElementById('sponsor-logo-preview').classList.remove('object-cover');
-                };
-                reader.readAsDataURL(fileInput.files[0]);
-            }
-        }
-
-        // Badge management for coach
-        function addBadge() {
+        addBadge: () => {
             const badgeInput = document.getElementById('new-badge');
             const badgeText = badgeInput.value.trim();
-            
             if (badgeText) {
                 const badge = document.createElement('div');
                 badge.className = 'flex items-center bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm';
                 badge.innerHTML = `
                     ${badgeText}
-                    <button onclick="this.parentElement.remove()" class="ml-2 text-blue-600 hover:text-blue-800">
+                    <button class="remove-badge-btn ml-2 text-blue-600 hover:text-blue-800">
                         <i class="fas fa-times"></i>
                     </button>
                 `;
@@ -965,6 +990,928 @@
                 badgeInput.value = '';
             }
         }
+    };
+
+    // Image upload functions
+    JoeFC.image = {
+        uploadImage: async (file, path) => {
+            if (!file) return null;
+            const storageRef = ref(JoeFC.firebase.storage, path);
+            await uploadBytes(storageRef, file);
+            return await getDownloadURL(storageRef);
+        },
+
+        previewPlayerImage: () => {
+            JoeFC.image.previewImage('player-image', 'player-image-preview');
+        },
+
+        previewCoachImage: () => {
+            JoeFC.image.previewImage('coach-image', 'coach-image-preview');
+        },
+
+        previewNewsImage: () => {
+            JoeFC.image.previewImage('news-image', 'news-image-preview');
+        },
+
+        previewSponsorLogo: () => {
+            JoeFC.image.previewImage('sponsor-logo', 'sponsor-logo-preview', true);
+        },
+
+        previewImage: (fileInputId, previewId, isLogo = false) => {
+            const fileInput = document.getElementById(fileInputId);
+            if (fileInput.files && fileInput.files[0]) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const preview = document.getElementById(previewId);
+                    preview.src = e.target.result;
+                    if (isLogo) {
+                        preview.classList.add('object-contain');
+                        preview.classList.remove('object-cover');
+                    }
+                };
+                reader.readAsDataURL(fileInput.files[0]);
+            }
+        }
+    };
+
+    // Data-related functions
+    JoeFC.data = {
+        loadDashboard: async () => {
+            try {
+                const [playersSnap, matchesSnap, gallerySnap, newsSnap, activitySnap] = await Promise.all([
+                    getDocs(collection(JoeFC.firebase.db, 'players')),
+                    getDocs(collection(JoeFC.firebase.db, 'matches')),
+                    getDocs(collection(JoeFC.firebase.db, 'gallery')),
+                    getDocs(collection(JoeFC.firebase.db, 'news')),
+                    getDocs(query(collection(JoeFC.firebase.db, 'activities'), orderBy('timestamp', 'desc')))
+                ]);
+                document.getElementById('total-players').textContent = playersSnap.size;
+                document.getElementById('upcoming-matches').textContent = matchesSnap.docs.filter(doc => doc.data().status === 'Upcoming').length;
+                document.getElementById('gallery-items').textContent = gallerySnap.size;
+                document.getElementById('news-articles').textContent = newsSnap.size;
+
+                const activityList = document.getElementById('recent-activity');
+                activityList.innerHTML = activitySnap.empty
+                    ? '<p class="text-center text-gray-500">No recent activity.</p>'
+                    : activitySnap.docs.map(doc => {
+                        const activity = doc.data();
+                        return `
+                            <div class="flex items-start p-3 rounded-lg hover:bg-gray-50">
+                                <div class="flex-shrink-0 mt-1">
+                                    <div class="h-10 w-10 rounded-full ${activity.color} flex items-center justify-center text-white">
+                                        <i class="fas ${activity.icon}"></i>
+                                    </div>
+                                </div>
+                                <div class="ml-4">
+                                    <p class="text-sm font-medium text-gray-900">${activity.text}</p>
+                                    <p class="text-xs text-gray-500">${activity.timestamp.toDate().toLocaleString()}</p>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+            } catch (e) {
+                console.error('Error loading dashboard:', e);
+            }
+        },
+
+        loadPlayers: async () => {
+            try {
+                const playersSnapshot = await getDocs(query(collection(JoeFC.firebase.db, 'players'), orderBy('number')));
+                const tableBody = document.getElementById('players-table');
+                tableBody.innerHTML = playersSnapshot.empty
+                    ? '<tr><td colspan="5" class="py-4 px-6 text-center text-gray-500">No players available.</td></tr>'
+                    : playersSnapshot.docs.map((doc, index) => {
+                        const player = doc.data();
+                        return `
+                            <tr>
+                                <td class="py-3 px-6">${index + 1}</td>
+                                <td class="py-3 px-6">${player.name}</td>
+                                <td class="py-3 px-6">${player.position}</td>
+                                <td class="py-3 px-6">${player.nationality}</td>
+                                <td class="py-3 px-6 text-center">
+                                    <button class="edit-player-btn text-blue-600 hover:text-blue-800 mr-2" data-id="${doc.id}">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="delete-player-btn text-red-600 hover:text-red-800" data-id="${doc.id}" data-name="${player.name}">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        `;
+                    }).join('');
+            } catch (e) {
+                console.error('Error loading players:', e);
+                document.getElementById('players-table').innerHTML = '<tr><td colspan="5" class="py-4 px-6 text-center text-gray-500">Failed to load players.</td></tr>';
+            }
+        },
+
+        deletePlayer: (id, name) => {
+            JoeFC.ui.showConfirmModal(`Are you sure you want to delete ${name}?`, async () => {
+                try {
+                    await deleteDoc(doc(JoeFC.firebase.db, 'players', id));
+                    await addDoc(collection(JoeFC.firebase.db, 'activities'), {
+                        icon: 'fa-user-minus',
+                        color: 'bg-red-500',
+                        text: `Player deleted: ${name}`,
+                        timestamp: Timestamp.now()
+                    });
+                    alert('Player deleted successfully!');
+                    JoeFC.data.loadPlayers();
+                    JoeFC.data.loadDashboard();
+                } catch (e) {
+                    console.error('Error deleting player:', e);
+                    alert('Error deleting player.');
+                }
+            });
+        },
+
+        loadMatches: async () => {
+            try {
+                const matchesSnapshot = await getDocs(query(collection(JoeFC.firebase.db, 'matches'), orderBy('date', 'desc')));
+                const tableBody = document.getElementById('matches-table');
+                tableBody.innerHTML = matchesSnapshot.empty
+                    ? '<tr><td colspan="6" class="py-4 px-6 text-center text-gray-500">No matches available.</td></tr>'
+                    : matchesSnapshot.docs.map(doc => {
+                        const match = doc.data();
+                        const result = match.status === 'Finished' ? `${match.result?.homeScore || 0} - ${match.result?.awayScore || 0}` : '-';
+                        return `
+                            <tr>
+                                <td class="py-3 px-6">${match.date}</td>
+                                <td class="py-3 px-6">${match.awayTeam}</td>
+                                <td class="py-3 px-6">${match.location}</td>
+                                <td class="py-3 px-6">${match.time}</td>
+                                <td class="py-3 px-6">${result}</td>
+                                <td class="py-3 px-6 text-center">
+                                    <button class="edit-match-btn text-blue-600 hover:text-blue-800 mr-2" data-id="${doc.id}">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="delete-match-btn text-red-600 hover:text-red-800" data-id="${doc.id}" data-name="${match.homeTeam} vs ${match.awayTeam}">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        `;
+                    }).join('');
+            } catch (e) {
+                console.error('Error loading matches:', e);
+                document.getElementById('matches-table').innerHTML = '<tr><td colspan="6" class="py-4 px-6 text-center text-gray-500">Failed to load matches.</td></tr>';
+            }
+        },
+
+        deleteMatch: (id, name) => {
+            JoeFC.ui.showConfirmModal(`Are you sure you want to delete the match ${name}?`, async () => {
+                try {
+                    await deleteDoc(doc(JoeFC.firebase.db, 'matches', id));
+                    await addDoc(collection(JoeFC.firebase.db, 'activities'), {
+                        icon: 'fa-calendar-times',
+                        color: 'bg-red-500',
+                        text: `Match deleted: ${name}`,
+                        timestamp: Timestamp.now()
+                    });
+                    alert('Match deleted successfully!');
+                    JoeFC.data.loadMatches();
+                    JoeFC.data.loadDashboard();
+                } catch (e) {
+                    console.error('Error deleting match:', e);
+                    alert('Error deleting match.');
+                }
+            });
+        },
+
+        loadNews: async () => {
+            try {
+                const newsSnapshot = await getDocs(query(collection(JoeFC.firebase.db, 'news'), orderBy('timestamp', 'desc')));
+                const container = document.getElementById('news-container');
+                container.innerHTML = newsSnapshot.empty
+                    ? '<p class="col-span-full text-center text-gray-600">No news available.</p>'
+                    : newsSnapshot.docs.map(doc => {
+                        const news = doc.data();
+                        const date = news.timestamp?.toDate().toLocaleDateString() || 'N/A';
+                        const categoryColor = {
+                            'Match Report': 'bg-blue-700',
+                            'Team News': 'bg-green-600',
+                            'Transfer News': 'bg-red-600',
+                            'Club Announcement': 'bg-purple-600',
+                            'Community': 'bg-yellow-500'
+                        }[news.category] || 'bg-gray-500';
+                        return `
+                            <div class="bg-white rounded-lg overflow-hidden shadow-md news-card transition duration-300">
+                                <div class="relative overflow-hidden h-48">
+                                    <img src="${news.image || 'https://via.placeholder.com/600x400?text=News'}" alt="${news.title}" class="w-full h-full object-cover">
+                                    <div class="absolute top-4 left-4 ${categoryColor} text-white px-3 py-1 rounded-md text-sm font-bold">
+                                        ${news.category || 'General'}
+                                    </div>
+                                </div>
+                                <div class="p-4">
+                                    <div class="text-xs text-gray-500 mb-2">${date}</div>
+                                    <h3 class="text-lg font-bold mb-2">${news.title}</h3>
+                                    <p class="text-gray-600 text-sm">${news.content.substring(0, 100)}...</p>
+                                    <div class="mt-4 flex justify-end space-x-2">
+                                        <button class="edit-news-btn text-blue-600 hover:text-blue-800" data-id="${doc.id}">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="delete-news-btn text-red-600 hover:text-red-800" data-id="${doc.id}" data-title="${news.title}">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+            } catch (e) {
+                console.error('Error loading news:', e);
+                document.getElementById('news-container').innerHTML = '<p class="col-span-full text-center text-gray-600">Failed to load news.</p>';
+            }
+        },
+
+        deleteNews: (id, title) => {
+            JoeFC.ui.showConfirmModal(`Are you sure you want to delete the news article "${title}"?`, async () => {
+                try {
+                    await deleteDoc(doc(JoeFC.firebase.db, 'news', id));
+                    await addDoc(collection(JoeFC.firebase.db, 'activities'), {
+                        icon: 'fa-newspaper',
+                        color: 'bg-red-500',
+                        text: `News article deleted: ${title}`,
+                        timestamp: Timestamp.now()
+                    });
+                    alert('News article deleted successfully!');
+                    JoeFC.data.loadNews();
+                    JoeFC.data.loadDashboard();
+                } catch (e) {
+                    console.error('Error deleting news:', e);
+                    alert('Error deleting news article.');
+                }
+            });
+        },
+
+        loadGallery: async () => {
+            try {
+                const gallerySnapshot = await getDocs(query(collection(JoeFC.firebase.db, 'gallery'), orderBy('timestamp', 'desc')));
+                const container = document.getElementById('gallery-container');
+                container.innerHTML = gallerySnapshot.empty
+                    ? '<p class="col-span-full text-center text-gray-600">No gallery images available.</p>'
+                    : gallerySnapshot.docs.map(doc => {
+                        const item = doc.data();
+                        return `
+                            <div class="relative group overflow-hidden rounded-lg h-64">
+                                <img src="${item.image || 'https://via.placeholder.com/800x600?text=Gallery'}" alt="${item.description}" class="w-full h-full object-cover transition duration-500 group-hover:scale-110">
+                                <div class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition duration-300">
+                                    <span class="text-white font-bold text-lg text-center px-4">${item.description}</span>
+                                </div>
+                                <button class="delete-gallery-btn absolute top-2 right-2 bg-red-600 hover:bg-red-700 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity" data-id="${doc.id}" data-description="${item.description}">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        `;
+                    }).join('');
+            } catch (e) {
+                console.error('Error loading gallery:', e);
+                document.getElementById('gallery-container').innerHTML = '<p class="col-span-full text-center text-gray-600">Failed to load gallery.</p>';
+            }
+        },
+
+        deleteGalleryImage: (id, description) => {
+            JoeFC.ui.showConfirmModal(`Are you sure you want to delete the image "${description}"?`, async () => {
+                try {
+                    await deleteDoc(doc(JoeFC.firebase.db, 'gallery', id));
+                    await addDoc(collection(JoeFC.firebase.db, 'activities'), {
+                        icon: 'fa-image',
+                        color: 'bg-red-500',
+                        text: `Gallery image deleted: ${description}`,
+                        timestamp: Timestamp.now()
+                    });
+                    alert('Gallery image deleted successfully!');
+                    JoeFC.data.loadGallery();
+                    JoeFC.data.loadDashboard();
+                } catch (e) {
+                    console.error('Error deleting gallery image:', e);
+                    alert('Error deleting gallery image.');
+                }
+            });
+        },
+
+        loadCoach: async () => {
+            try {
+                const coachDoc = await getDoc(doc(JoeFC.firebase.db, 'settings', 'coach'));
+                const coachName = document.getElementById('coach-name');
+                const coachImage = document.getElementById('coach-image-preview');
+                const coachSpeech = document.getElementById('coach-speech');
+                const coachBadges = document.getElementById('badges-container');
+                if (coachDoc.exists()) {
+                    const data = coachDoc.data();
+                    coachName.value = data.name || '';
+                    coachSpeech.value = data.speech || '';
+                    coachImage.src = data.image || 'https://via.placeholder.com/300x400?text=Coach';
+                    coachBadges.innerHTML = data.badges && Array.isArray(data.badges)
+                        ? data.badges.map(badge => `
+                            <div class="flex items-center bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
+                                ${badge}
+                                <button class="remove-badge-btn ml-2 text-blue-600 hover:text-blue-800">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        `).join('')
+                        : '';
+                } else {
+                    coachName.value = '';
+                    coachSpeech.value = '';
+                    coachImage.src = 'https://via.placeholder.com/300x400?text=Coach';
+                    coachBadges.innerHTML = '';
+                }
+            } catch (e) {
+                console.error('Error loading coach:', e);
+            }
+        },
+
+        loadSponsors: async () => {
+            try {
+                const sponsorsSnapshot = await getDocs(query(collection(JoeFC.firebase.db, 'sponsors'), orderBy('timestamp', 'desc')));
+                const container = document.getElementById('sponsors-container');
+                container.innerHTML = sponsorsSnapshot.empty
+                    ? '<p class="col-span-full text-center text-gray-600">No sponsors available.</p>'
+                    : sponsorsSnapshot.docs.map(doc => {
+                        const sponsor = doc.data();
+                        return `
+                            <div class="relative group bg-white rounded-lg p-4 shadow-md">
+                                <img src="${sponsor.image || 'https://via.placeholder.com/300x150?text=Sponsor+Logo'}" alt="${sponsor.name}" class="w-full h-32 object-contain">
+                                <div class="mt-2">
+                                    <h4 class="font-bold text-sm">${sponsor.name}</h4>
+                                    <p class="text-xs text-gray-600">${sponsor.type}</p>
+                                </div>
+                                <div class="absolute top-2 right-2 flex space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <button class="edit-sponsor-btn text-blue-600 hover:text-blue-800" data-id="${doc.id}">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="delete-sponsor-btn text-red-600 hover:text-red-800" data-id="${doc.id}" data-name="${sponsor.name}">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+            } catch (e) {
+                console.error('Error loading sponsors:', e);
+                document.getElementById('sponsors-container').innerHTML = '<p class="col-span-full text-center text-gray-600">Failed to load sponsors.</p>';
+            }
+        },
+
+        deleteSponsor: (id, name) => {
+            JoeFC.ui.showConfirmModal(`Are you sure you want to delete the sponsor "${name}"?`, async () => {
+                try {
+                    await deleteDoc(doc(JoeFC.firebase.db, 'sponsors', id));
+                    await addDoc(collection(JoeFC.firebase.db, 'activities'), {
+                        icon: 'fa-handshake',
+                        color: 'bg-red-500',
+                        text: `Sponsor deleted: ${name}`,
+                        timestamp: Timestamp.now()
+                    });
+                    alert('Sponsor deleted successfully!');
+                    JoeFC.data.loadSponsors();
+                    JoeFC.data.loadDashboard();
+                } catch (e) {
+                    console.error('Error deleting sponsor:', e);
+                    alert('Error deleting sponsor.');
+                }
+            });
+        },
+
+        loadSettings: async () => {
+            try {
+                const [nextMatchDoc, statsDoc, footerDoc, socialDoc] = await Promise.all([
+                    getDoc(doc(JoeFC.firebase.db, 'settings', 'nextMatch')),
+                    getDoc(doc(JoeFC.firebase.db, 'settings', 'stats')),
+                    getDoc(doc(JoeFC.firebase.db, 'settings', 'footer')),
+                    getDoc(doc(JoeFC.firebase.db, 'settings', 'social'))
+                ]);
+                if (nextMatchDoc.exists()) {
+                    const data = nextMatchDoc.data();
+                    document.getElementById('next-match-home').value = data.homeTeam || '';
+                    document.getElementById('next-match-away').value = data.awayTeam || '';
+                    document.getElementById('next-match-date').value = data.date || '';
+                    document.getElementById('next-match-time').value = data.time || '';
+                    document.getElementById('next-match-competition').value = data.competition || '';
+                }
+                if (statsDoc.exists()) {
+                    const data = statsDoc.data();
+                    document.getElementById('stats-matches').value = data.matches || 0;
+                    document.getElementById('stats-wins').value = data.wins || 0;
+                    document.getElementById('stats-goals').value = data.goals || 0;
+                    document.getElementById('stats-points').value = data.points || 0;
+                }
+                if (footerDoc.exists()) {
+                    document.getElementById('footer-text').value = footerDoc.data().text || '';
+                }
+                if (socialDoc.exists()) {
+                    const data = socialDoc.data();
+                    document.getElementById('social-facebook').value = data.facebook || '';
+                    document.getElementById('social-twitter').value = data.twitter || '';
+                    document.getElementById('social-instagram').value = data.instagram || '';
+                    document.getElementById('social-youtube').value = data.youtube || '';
+                    document.getElementById('social-tiktok').value = data.tiktok || '';
+                }
+            } catch (e) {
+                console.error('Error loading settings:', e);
+            }
+        }
+    };
+
+    // Form submission handlers
+    JoeFC.forms = {
+        handlePlayerSubmit: async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('player-id').value;
+            const name = document.getElementById('player-name').value.trim();
+            const number = document.getElementById('player-number').value;
+            const position = document.getElementById('player-position').value;
+            const nationality = document.getElementById('player-nationality').value.trim();
+            const role = document.getElementById('player-role').value.trim();
+            const file = document.getElementById('player-image').files[0];
+            try {
+                let imageUrl = document.getElementById('player-image-preview').src;
+                if (file) {
+                    imageUrl = await JoeFC.image.uploadImage(file, `players/${Date.now()}_${file.name}`);
+                }
+                const playerData = {
+                    name,
+                    number: parseInt(number),
+                    position,
+                    nationality,
+                    role: role || null,
+                    image: imageUrl,
+                    timestamp: Timestamp.now()
+                };
+                if (id) {
+                    await updateDoc(doc(JoeFC.firebase.db, 'players', id), playerData);
+                    await addDoc(collection(JoeFC.firebase.db, 'activities'), {
+                        icon: 'fa-user-edit',
+                        color: 'bg-blue-500',
+                        text: `Player updated: ${name}`,
+                        timestamp: Timestamp.now()
+                    });
+                    alert('Player updated successfully!');
+                } else {
+                    await addDoc(collection(JoeFC.firebase.db, 'players'), playerData);
+                    await addDoc(collection(JoeFC.firebase.db, 'activities'), {
+                        icon: 'fa-user-plus',
+                        color: 'bg-green-500',
+                        text: `Player added: ${name}`,
+                        timestamp: Timestamp.now()
+                    });
+                    alert('Player added successfully!');
+                }
+                JoeFC.ui.closeModal('player-modal');
+                JoeFC.data.loadPlayers();
+                JoeFC.data.loadDashboard();
+            } catch (e) {
+                console.error('Error saving player:', e);
+                alert('Error saving player.');
+            }
+        },
+
+        handleMatchSubmit: async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('match-id').value;
+            const date = document.getElementById('match-date').value;
+            const time = document.getElementById('match-time').value;
+            const homeTeam = document.getElementById('match-home').value.trim();
+            const awayTeam = document.getElementById('match-away').value.trim();
+            const location = document.getElementById('match-location').value.trim();
+            const competition = document.getElementById('match-competition').value.trim();
+            const status = document.getElementById('match-status').value;
+            const description = document.getElementById('match-description').value.trim();
+            const matchData = {
+                date,
+                time,
+                homeTeam,
+                awayTeam,
+                location,
+                competition,
+                status,
+                description: description || null,
+                timestamp: Timestamp.now()
+            };
+            if (status === 'Finished') {
+                matchData.result = {
+                    homeScore: parseInt(document.getElementById('match-home-score').value) || 0,
+                    awayScore: parseInt(document.getElementById('match-away-score').value) || 0
+                };
+            }
+            try {
+                if (id) {
+                    await updateDoc(doc(JoeFC.firebase.db, 'matches', id), matchData);
+                    await addDoc(collection(JoeFC.firebase.db, 'activities'), {
+                        icon: 'fa-calendar-check',
+                        color: 'bg-blue-500',
+                        text: `Match updated: ${homeTeam} vs ${awayTeam}`,
+                        timestamp: Timestamp.now()
+                    });
+                    alert('Match updated successfully!');
+                } else {
+                    await addDoc(collection(JoeFC.firebase.db, 'matches'), matchData);
+                    await addDoc(collection(JoeFC.firebase.db, 'activities'), {
+                        icon: 'fa-calendar-plus',
+                        color: 'bg-green-500',
+                        text: `Match added: ${homeTeam} vs ${awayTeam}`,
+                        timestamp: Timestamp.now()
+                    });
+                    alert('Match added successfully!');
+                }
+                JoeFC.ui.closeModal('match-modal');
+                JoeFC.data.loadMatches();
+                JoeFC.data.loadDashboard();
+            } catch (e) {
+                console.error('Error saving match:', e);
+                alert('Error saving match.');
+            }
+        },
+
+        handleNewsSubmit: async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('news-id').value;
+            const title = document.getElementById('news-title').value.trim();
+            const category = document.getElementById('news-category').value;
+            const date = document.getElementById('news-date').value;
+            const content = document.getElementById('news-content').value.trim();
+            const file = document.getElementById('news-image').files[0];
+            try {
+                let imageUrl = document.getElementById('news-image-preview').src;
+                if (file) {
+                    imageUrl = await JoeFC.image.uploadImage(file, `news/${Date.now()}_${file.name}`);
+                }
+                const newsData = {
+                    title,
+                    category,
+                    date,
+                    content,
+                    image: imageUrl,
+                    timestamp: Timestamp.now()
+                };
+                if (id) {
+                    await updateDoc(doc(JoeFC.firebase.db, 'news', id), newsData);
+                    await addDoc(collection(JoeFC.firebase.db, 'activities'), {
+                        icon: 'fa-newspaper',
+                        color: 'bg-blue-500',
+                        text: `News article updated: ${title}`,
+                        timestamp: Timestamp.now()
+                    });
+                    alert('News article updated successfully!');
+                } else {
+                    await addDoc(collection(JoeFC.firebase.db, 'news'), newsData);
+                    await addDoc(collection(JoeFC.firebase.db, 'activities'), {
+                        icon: 'fa-newspaper',
+                        color: 'bg-purple-500',
+                        text: `News article published: ${title}`,
+                        timestamp: Timestamp.now()
+                    });
+                    alert('News article published successfully!');
+                }
+                JoeFC.ui.closeModal('news-modal');
+                JoeFC.data.loadNews();
+                JoeFC.data.loadDashboard();
+            } catch (e) {
+                console.error('Error saving news:', e);
+                alert('Error saving news article.');
+            }
+        },
+
+        handleCoachSubmit: async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('coach-name').value.trim();
+            const speech = document.getElementById('coach-speech').value.trim();
+            const badges = Array.from(document.getElementById('badges-container').children).map(badge => badge.textContent.replace('×', '').trim());
+            const file = document.getElementById('coach-image').files[0];
+            try {
+                let imageUrl = document.getElementById('coach-image-preview').src;
+                if (file) {
+                    imageUrl = await JoeFC.image.uploadImage(file, `coach/coach_${Date.now()}_${file.name}`);
+                }
+                const coachData = {
+                    name,
+                    speech,
+                    badges,
+                    image: imageUrl,
+                    timestamp: Timestamp.now()
+                };
+                await updateDoc(doc(JoeFC.firebase.db, 'settings', 'coach'), coachData);
+                await addDoc(collection(JoeFC.firebase.db, 'activities'), {
+                    icon: 'fa-user-tie',
+                    color: 'bg-blue-500',
+                    text: `Coach information updated: ${name}`,
+                    timestamp: Timestamp.now()
+                });
+                alert('Coach information saved successfully!');
+                JoeFC.data.loadCoach();
+            } catch (e) {
+                console.error('Error saving coach:', e);
+                alert('Error saving coach information.');
+            }
+        },
+
+        handleSponsorSubmit: async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('sponsor-id').value;
+            const name = document.getElementById('sponsor-name').value.trim();
+            const type = document.getElementById('sponsor-type').value;
+            const website = document.getElementById('sponsor-website').value.trim();
+            const file = document.getElementById('sponsor-logo').files[0];
+            try {
+                let imageUrl = document.getElementById('sponsor-logo-preview').src;
+                if (file) {
+                    imageUrl = await JoeFC.image.uploadImage(file, `sponsors/${Date.now()}_${file.name}`);
+                }
+                const sponsorData = {
+                    name,
+                    type,
+                    website: website || null,
+                    image: imageUrl,
+                    timestamp: Timestamp.now()
+                };
+                if (id) {
+                    await updateDoc(doc(JoeFC.firebase.db, 'sponsors', id), sponsorData);
+                    await addDoc(collection(JoeFC.firebase.db, 'activities'), {
+                        icon: 'fa-handshake',
+                        color: 'bg-blue-500',
+                        text: `Sponsor updated: ${name}`,
+                        timestamp: Timestamp.now()
+                    });
+                    alert('Sponsor updated successfully!');
+                } else {
+                    await addDoc(collection(JoeFC.firebase.db, 'sponsors'), sponsorData);
+                    await addDoc(collection(JoeFC.firebase.db, 'activities'), {
+                        icon: 'fa-handshake',
+                        color: 'bg-red-500',
+                        text: `Sponsor added: ${name}`,
+                        timestamp: Timestamp.now()
+                    });
+                    alert('Sponsor added successfully!');
+                }
+                JoeFC.ui.closeModal('sponsor-modal');
+                JoeFC.data.loadSponsors();
+                JoeFC.data.loadDashboard();
+            } catch (e) {
+                console.error('Error saving sponsor:', e);
+                alert('Error saving sponsor.');
+            }
+        },
+
+        handleSettingsSubmit: async (e) => {
+            e.preventDefault();
+            try {
+                const nextMatchData = {
+                    homeTeam: document.getElementById('next-match-home').value.trim(),
+                    awayTeam: document.getElementById('next-match-away').value.trim(),
+                    date: document.getElementById('next-match-date').value,
+                    time: document.getElementById('next-match-time').value,
+                    competition: document.getElementById('next-match-competition').value.trim(),
+                    timestamp: Timestamp.now()
+                };
+                const statsData = {
+                    matches: parseInt(document.getElementById('stats-matches').value) || 0,
+                    wins: parseInt(document.getElementById('stats-wins').value) || 0,
+                    goals: parseInt(document.getElementById('stats-goals').value) || 0,
+                    points: parseInt(document.getElementById('stats-points').value) || 0,
+                    timestamp: Timestamp.now()
+                };
+                const footerData = {
+                    text: document.getElementById('footer-text').value.trim(),
+                    timestamp: Timestamp.now()
+                };
+                const socialData = {
+                    facebook: document.getElementById('social-facebook').value.trim() || null,
+                    twitter: document.getElementById('social-twitter').value.trim() || null,
+                    instagram: document.getElementById('social-instagram').value.trim() || null,
+                    youtube: document.getElementById('social-youtube').value.trim() || null,
+                    tiktok: document.getElementById('social-tiktok').value.trim() || null,
+                    timestamp: Timestamp.now()
+                };
+                await Promise.all([
+                    updateDoc(doc(JoeFC.firebase.db, 'settings', 'nextMatch'), nextMatchData),
+                    updateDoc(doc(JoeFC.firebase.db, 'settings', 'stats'), statsData),
+                    updateDoc(doc(JoeFC.firebase.db, 'settings', 'footer'), footerData),
+                    updateDoc(doc(JoeFC.firebase.db, 'settings', 'social'), socialData)
+                ]);
+                await addDoc(collection(JoeFC.firebase.db, 'activities'), {
+                    icon: 'fa-cog',
+                    color: 'bg-blue-500',
+                    text: 'Club settings updated',
+                    timestamp: Timestamp.now()
+                });
+                alert('Settings saved successfully!');
+                JoeFC.data.loadSettings();
+            } catch (e) {
+                console.error('Error saving settings:', e);
+                alert('Error saving settings.');
+            }
+        }
+    };
+
+    // Authentication functions
+    JoeFC.auth = {
+        logout: () => {
+            JoeFC.ui.showConfirmModal('Are you sure you want to logout?', async () => {
+                try {
+                    await signOut(JoeFC.firebase.auth);
+                    await addDoc(collection(JoeFC.firebase.db, 'activities'), {
+                        icon: 'fa-sign-out-alt',
+                        color: 'bg-gray-500',
+                        text: 'User logged out',
+                        timestamp: Timestamp.now()
+                    });
+                    alert('You have been logged out successfully!');
+                    window.location.href = 'logout.html';
+                } catch (e) {
+                    console.error('Error logging out:', e);
+                    alert('Error logging out.');
+                }
+            });
+        }
+    };
+
+    // Gallery drag and drop functions
+    JoeFC.gallery = {
+        handleDrop: (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const dt = e.dataTransfer;
+            const files = e.dataTransfer.files;
+            JoeFC.gallery.handleFiles(files);
+        },
+
+        handleFiles: (files) => {
+            const uploadedImages = document.getElementById('uploaded-images');
+            uploadedImages.innerHTML = '';
+            if (files.length > 0) {
+                document.getElementById('upload-progress').classList.remove('hidden');
+                document.getElementById('upload-count').textContent = `0}/${files.length}`;
+                document.getElementById('upload-progress-bar').style.width = '0%';
+                document.getElementById('save-button-container').classList.remove('hidden');
+                Array.from(files).forEach((file, index) => {
+                    if (file.type.match('image.*')) {
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            const imgContainer = doc.createElement('div');
+                            imgContainer.className = 'relative group';
+                            imgContainer.innerHTML = `
+                                <img src="${e.target.result}" class="w-full h-48 object-cover rounded-lg">
+                                <button class="remove-img-btn absolute top-2 right-2 bg-red-600 hover:bg-red-700 text-white p-2 rounded-full opacity-0 group-hover:opacity-100">
+                                    <button class="remove-img-btn mr-2 text-white p-2 rounded-full">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                `;
+                            </div>`;
+                            uploadedImages.appendChild(imgContainer);
+                            const uploadedCount = uploadedImages.children.length;
+                            document.getElementById('upload-count').textContent = `${uploadedCount}/${files.length}`;
+                            const progress = (uploadedCount / files.length) * 100;
+                            document.getElementById('upload-progress-bar').style.width = `${progress}%`;
+                            if (uploadedCount === files.length) {
+                                document.getElementById('upload-progress').classList.add('hidden');
+                            }
+                        };
+                    });
+                    reader.readAsDataURL(file);
+                });
+            }
+        },
+
+        saveGalleryImages: async () => {
+            try {
+                const uploadedImages = await getDoc.getElementById('uploaded-images').children;
+                const files = Array.from(document.getElementById('gallery-upload').files);
+                for (let i = 0; i < files.length; i++) {
+                    if (files[i].type.match('image.*')) {
+                        const imageUrl = await JoeFC.image.uploadImage(files[i], `gallery/${Date.now()}_${files[i].name}`);
+                        await addDoc(collection(JoeFC.firebase.db, 'gallery'), {
+                            image: imageUrl,
+                            description: `Image uploaded on ${new Date().toLocaleDateString()}`,
+                            timestamp: Timestamp.now()
+                        });
+                    }
+                }
+                await addDoc(collection(JoeFC.firebase.db, 'activities'), {
+                    icon: 'fa-image',
+                    color: 'bg-yellow-500',
+                    text: `${files.length} new images added to gallery`,
+                    timestamp: Timestamp.now()
+                });
+                alert('Gallery images saved successfully!');
+                document.getElementById('uploaded-images').innerHTML = '';
+                document.getElementById('save-button-container').classList.add('hidden');
+                document.getElementById('gallery-upload').value = '';
+                JoeFC.data.loadGallery();
+                JoeFC.data.loadDashboard();
+            } catch (e) {
+                console.error('Error saving gallery images:', e);
+                alert('Error saving gallery images.');
+                try {
+            }
+        }
+    };
+
+    // Event listener setup
+    function initialize() {
+        // Sidebar toggle
+        document.getElementById('toggle-sidebar').addEventListener('click', JoeFC.ui.toggleSidebar);
+
+        // Sidebar tab navigation
+        document.getElementById('sidebar-nav').addEventListener('click', (e) => {
+            const button = e.target.closest('.tab-button');
+            if (button) {
+                e.preventDefault();
+                JoeFC.ui.showTab(button.dataset.tab);
+            }
+        });
+
+        // Modal close buttons
+        document.addEventListener('click', (e) => {
+            const closeBtn = e.target.closest('button.close-modal-btn');
+            if (closeBtn) {
+                JoeFC.ui.closeModal(closeBtn.dataset.modal);
+            }
+        });
+
+        // Form submissions
+        document.getElementById('player-form').addEventListener('submit', JoeFC.forms.handlePlayerSubmit);
+        document.getElementById('match-form').addEventListener('submit', JoeFC.forms.handleMatchSubmit);
+        document.getElementById('news-form').addEventListener('submit', JoeFC.forms.handleNewsSubmit);
+        document.getElementById('coach-form').addEventListener('submit', JoeFC.forms.handleCoachSubmit);
+        document.getElementById('sponsor-form').addEventListener('submit', JoeFC.forms.handleSponsorSubmit);
+        document.getElementById('settings-form').setEventListener('submit', JoeFC.forms.handleSettingsSubmit);
+
+        // Image inputs
+        document.getElementById('player-image').addEventListener('change', JoeFC.image.previewPlayerImage);
+        document.getElementById('coach-image').addEventListener('change', JoeFC.image.previewCoachImage);
+        document.getElementById('news-image').addEventListener('change', JoeFC.image.previewNewsImage);
+        document.getElementById('sponsor-logo').addEventListener('change', JoeFC.image.previewSponsorImage);
+
+        // Match status change
+        document.getElementById('match-status').addEventListener('change', () => {
+            document.getElementById('result-fields').classList.toggle('hidden', this.value !== 'Finished');
+        });
+
+        // Badge management
+        document.addEventListener('click', (e) => {
+            const removeBadgeBtn = e.target.closest('.remove-badge-btn');
+            if (removeBadgeBtn) {
+                removeBadgeBtn.parentElement.remove();
+            }
+        });
+
+        document.getElementById('add-badge-btn').addEventListener('click', JoeFC.ui.addBadge);
+
+        // Dynamic table and gallery actions
+        document.addEventListener('click', (e) => {
+            const editPlayerBtn = e.target.closest('.edit-player-btn');
+            const deletePlayerBtn = e.target.closest('.delete-player-btn');
+            const editMatchBtn = e.target.closest('.edit-match-btn');
+            const deleteMatchBtn = e.target.closest('.delete-match-btn');
+            const editNewsBtn = e.target.closest('.edit-news-btn');
+            const deleteNewsBtn = e.target.closest('.delete-news-btn');
+            const deleteGalleryBtn = e.target.closest('.delete-gallery-btn');
+            const editSponsorBtn = e.target.closest('.edit-sponsor-btn');
+            const deleteSponsorBtn = e.target.closestdelete-sponsor-btn');
+
+            if (editPlayerBtn) {
+                JoeFC.ui.openPlayerModal(editPlayerBtn.dataset.id);
+            } else if (deletePlayerBtn) {
+                JoeFC.data.deletePlayer(deletePlayerBtn.dataset.id, deletePlayerBtn.dataset.name);
+            } else if (editMatchBtn) {
+                JoeFC.ui.openMatchModal(editMatchBtn.dataset.id);
+            } else if (deleteMatchBtn) {
+                JoeFC.data.deleteMatch(deleteMatchBtn.dataset.id, deleteMatchBtn.dataset.name);
+            } else if (editNewsBtn) {
+                JoeFC.ui.openNewsModal(editNewsBtn.dataset.id);
+            } else if (deleteNewsBtn) {
+                JoeFC.data.deleteNews(deleteNewsBtn.dataset.id, deleteNewsBtn.dataset.title);
+            } else if (deleteGalleryBtn) {
+                JoeFC.data.deleteGalleryImage(deleteGalleryBtn.dataset.id, deleteGalleryBtn.dataset.description);
+            } else if (editSponsorBtn) {
+                JoeFC.ui.openSponsorModal(editSponsorBtn.dataset.id);
+            } else if (deleteSponsorBtn) {
+                JoeFC.data.deleteSponsor(deleteSponsorBtn.dataset.id, deleteSponsorBtn.dataset.name);
+            }
+        });
+
+        // Add player, match, and gallery buttons
+        document.addEventListener('click', (e) => {
+            const addPlayerBtn = e.target.closest('.add-player-btn');
+            const addMatchBtn = e.target.closest('.add-match-btn');
+            const addNewsBtn = e.target.closest('.add-news-btn');
+            const addSponsorBtn = e.target.closest('.add-sponsor-btn');
+            const saveGalleryBtn = e.target.closest('.save-gallery-btn');
+
+            if (addPlayerBtn) {
+                JoeFC.ui.openPlayerModal();
+            } else if (addMatchBtn) {
+                JoeFC.ui.openMatchModal();
+            } else if (addNewsBtn) {
+                JoeFC.ui.openNewsModal();
+            } else if (addSponsorBtn) {
+                JoeFC.ui.openSponsorModal();
+            } else if (saveGalleryBtn) {
+                JoeFC.gallery.saveGalleryImages();
+            }
+        });
 
         // Drag and drop for gallery
         const dropzone = document.getElementById('dropzone');
@@ -973,180 +1920,71 @@
         dropzone.addEventListener('click', () => fileInput.click());
 
         ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-            dropzone.addEventListener(eventName, preventDefaults, false);
+            dropzone.addEventListener(eventName, e => {
+                e.preventDefault();
+                e.stopPropagation();
+            }, false);
         });
 
-        function preventDefaults(e) {
-            e.preventDefault();
-            e.stopPropagation();
-        }
-
         ['dragenter', 'dragover'].forEach(eventName => {
-            dropzone.addEventListener(eventName, highlight, false);
+            dropzone.addEventListener(eventName, () => dropzone.classList.add('active'), false);
         });
 
         ['dragleave', 'drop'].forEach(eventName => {
-            dropzone.addEventListener(eventName, unhighlight, false);
+            dropzone.addEventListener(eventName, () => dropzone.classList.remove('active'), false);
         });
 
-        function highlight() {
-            dropzone.classList.add('active');
-        }
+        dropzone.addEventListener('drop', JoeFC.gallery.handleDrop, false);
 
-        function unhighlight() {
-            dropzone.classList.remove('active');
-        }
+        fileInput.addEventListener('change', e => JoeFC.gallery.handleFiles(e.target.files), false);
 
-        dropzone.addEventListener('drop', handleDrop, false);
-
-        function handleDrop(e) {
-            const dt = e.dataTransfer;
-            const files = dt.files;
-            handleFiles(files);
-        }
-
-        fileInput.addEventListener('change', function() {
-            handleFiles(this.files);
-        });
-
-        function handleFiles(files) {
-            const uploadedImages = document.getElementById('uploaded-images');
-            uploadedImages.innerHTML = '';
-            
-            if (files.length > 0) {
-                document.getElementById('upload-progress').classList.remove('hidden');
-                document.getElementById('upload-count').textContent = `0/${files.length}`;
-                document.getElementById('upload-progress-bar').style.width = '0%';
-                document.getElementById('save-button-container').classList.remove('hidden');
-                
-                Array.from(files).forEach((file, index) => {
-                    if (file.type.match('image.*')) {
-                        const reader = new FileReader();
-                        reader.onload = function(e) {
-                            const imgContainer = document.createElement('div');
-                            imgContainer.className = 'relative group';
-                            imgContainer.innerHTML = `
-                                <img src="${e.target.result}" class="w-full h-48 object-cover rounded-lg preview-image">
-                                <button onclick="this.parentElement.remove()" class="absolute top-2 right-2 bg-red-600 hover:bg-red-700 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            `;
-                            uploadedImages.appendChild(imgContainer);
-                            
-                            // Update progress
-                            const uploadedCount = uploadedImages.children.length;
-                            document.getElementById('upload-count').textContent = `${uploadedCount}/${files.length}`;
-                            const progress = (uploadedCount / files.length) * 100;
-                            document.getElementById('upload-progress-bar').style.width = `${progress}%`;
-                            
-                            if (uploadedCount === files.length) {
-                                document.getElementById('upload-progress').classList.add('hidden');
-                            }
-                        };
-                        reader.readAsDataURL(file);
-                    }
-                });
-            }
-        }
-
-        function saveGalleryImages() {
-            // Here you would implement the logic to save the images to your backend
-            alert('Gallery images saved successfully!');
-            document.getElementById('uploaded-images').innerHTML = '';
-            document.getElementById('save-button-container').classList.add('hidden');
-            fileInput.value = '';
-        }
-
-        // Form submissions
-        document.getElementById('player-form').addEventListener('submit', function(e) {
+        // Logout button
+        document.getElementById('logout-btn').addEventListener('click', e => {
             e.preventDefault();
-            // Here you would implement the logic to save player data
-            alert('Player saved successfully!');
-            closeModal('player-modal');
+            JoeFC.auth.logout();
         });
 
-        document.getElementById('match-form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            // Here you would implement the logic to save match data
-            alert('Match saved successfully!');
-            closeModal('match-modal');
-        });
+        // Initial load
+        JoeFC.data.loadDashboard();
+    }
 
-        document.getElementById('news-form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            // Here you would implement the logic to save news data
-            alert('News article published successfully!');
-            closeModal('news-modal');
-        });
+    // Run initialization
+    document.addEventListener('DOMContentLoaded', initialize);
+</script>
 
-        document.getElementById('sponsor-form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            // Here you would implement the logic to save sponsor data
-            alert('Sponsor saved successfully!');
-            closeModal('sponsor-modal');
-        });
-
-        document.getElementById('coach-form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            // Here you would implement the logic to save coach data
-            alert('Coach information saved successfully!');
-        });
-
-        document.getElementById('settings-form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            // Here you would implement the logic to save settings
-            alert('Settings saved successfully!');
-        });
-
-        // Logout function
-        function logout() {
-            showConfirmModal('Are you sure you want to logout?', function() {
-                // Here you would implement the logout logic
-                alert('You have been logged out successfully!');
-                // Redirect to login page
-                window.location.href = 'login.html';
-            });
-        }
-
-        // Initialize dashboard stats (mock data)
-        document.addEventListener('DOMContentLoaded', function() {
-            // Simulate loading data
-            setTimeout(() => {
-                document.getElementById('total-players').textContent = '24';
-                document.getElementById('upcoming-matches').textContent = '3';
-                document.getElementById('gallery-items').textContent = '47';
-                document.getElementById('news-articles').textContent = '12';
-                
-                // Simulate recent activity
-                const activityList = document.getElementById('recent-activity');
-                activityList.innerHTML = '';
-                
-                const activities = [
-                    { icon: 'fa-user-plus', color: 'bg-green-500', text: 'New player added: John Doe', time: '2 mins ago' },
-                    { icon: 'fa-calendar-plus', color: 'bg-blue-500', text: 'New match scheduled vs. City FC', time: '1 hour ago' },
-                    { icon: 'fa-newspaper', color: 'bg-purple-500', text: 'News article published: Season Preview', time: '3 hours ago' },
-                    { icon: 'fa-image', color: 'bg-yellow-500', text: '5 new images added to gallery', time: '5 hours ago' },
-                    { icon: 'fa-handshake', color: 'bg-red-500', text: 'New sponsor added: Sportswear Inc.', time: '1 day ago' }
-                ];
-                
-                activities.forEach(activity => {
-                    const item = document.createElement('div');
-                    item.className = 'flex items-start p-3 rounded-lg hover:bg-gray-50';
-                    item.innerHTML = `
-                        <div class="flex-shrink-0 mt-1">
-                            <div class="h-10 w-10 rounded-full ${activity.color} flex items-center justify-center text-white">
-                                <i class="fas ${activity.icon}"></i>
-                            </div>
-                        </div>
-                        <div class="ml-4">
-                            <p class="text-sm font-medium text-gray-900">${activity.text}</p>
-                            <p class="text-xs text-gray-500">${activity.time}</p>
-                        </div>
-                    `;
-                    activityList.appendChild(item);
-                });
-            }, 1000);
-        });
-    </script>
+<script>
+    // Inline script for HTML compatibility with event handlers
+    function showTab(tabId) {
+        JoeFC.ui.showTab(tabId);
+    }
+    function openPlayerModal(id) {
+        JoeFC.ui.openPlayerModal(id);
+    }
+    function openMatchModal(id) {
+        JoeFC.ui.openMatchModal(id);
+    }
+    function openNewsModal(id) {
+        JoeFC.ui.openNewsModal(id);
+    }
+    function openSponsorModal(id) {
+        JoeFC.ui.openSponsorModal(id);
+    }
+    function deletePlayer(id, name) {
+        JoeFC.data.deletePlayer(id, name);
+    }
+    function deleteMatch(id, name) {
+        JoeFC.data.deleteMatch(id, name);
+    }
+    function deleteNews(id, title) {
+        JoeFC.data.deleteNews(id, title);
+    }
+    function deleteGalleryImage(id, description) {
+        JoeFC.data.deleteGalleryImage(id, description);
+    }
+    function deleteSponsor(id, name) {
+        JoeFC.data.deleteSponsor(id, name);
+    }
+</script>
+    
 </body>
 </html>
